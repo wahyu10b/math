@@ -1,0 +1,2743 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Math Quiz - Neo Brutalism</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #E2E8F0;
+            --app-bg: #FFFFFF;
+            --border-color: #000000;
+            --text-main: #000000;
+            --text-muted: #475569;
+            --primary: #FFDE59;
+            --secondary: #00BF63;
+            --blue: #3B82F6;
+            --danger: #FF3131;
+            --pink: #FF66C4;
+            --cyan: #00E5FF;
+            --purple: #A855F7;
+            --diamond: #0097B2;
+            --coin: #FF914D;
+            --tips: #FF66C4;
+            --border-thick: 3px solid #000000;
+            --shadow: 4px 4px 0px #000000;
+            --shadow-sm: 2px 2px 0px #000000;
+            --brutal-radius: 8px;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Space Grotesk', sans-serif;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            font-weight: 600;
+        }
+        #app {
+            width: 100%;
+            max-width: 480px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            background-color: var(--app-bg);
+            border-left: var(--border-thick);
+            border-right: var(--border-thick);
+            overflow: hidden;
+            transition: background 0.3s;
+        }
+        #app.bg-wrong {
+            background-color: #FFB3B3;
+        }
+        #app.bg-correct {
+            background-color: #B3FFC6;
+        }
+        @keyframes popIn {
+            0% {
+                transform: scale(0.9);
+                opacity: 0;
+            }
+            60% {
+                transform: scale(1.05);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        @keyframes slideUp {
+            0% {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+            100% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        @keyframes purpleGlow {
+            0%,
+            100% {
+                box-shadow: 0 0 6px 2px rgba(168, 85, 247, 0.6);
+            }
+            50% {
+                box-shadow: 0 0 16px 6px rgba(168, 85, 247, 0.9);
+            }
+        }
+        @keyframes shake {
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+            20% {
+                transform: translateX(-6px);
+            }
+            40% {
+                transform: translateX(6px);
+            }
+            60% {
+                transform: translateX(-4px);
+            }
+            80% {
+                transform: translateX(4px);
+            }
+        }
+        @keyframes rankSlide {
+            0% {
+                transform: translateX(-8px);
+            }
+            50% {
+                transform: translateX(8px);
+            }
+            100% {
+                transform: translateX(0);
+            }
+        }
+        .bouncy {
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        .slide-up {
+            animation: slideUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        .purple-glow {
+            animation: purpleGlow 0.8s ease-in-out infinite;
+        }
+        .shake-anim {
+            animation: shake 0.5s ease-in-out;
+        }
+        .rank-slide {
+            animation: rankSlide 0.6s ease-in-out;
+        }
+        .brutal-click {
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+        .brutal-click:active {
+            transform: translate(4px, 4px) !important;
+            box-shadow: 0px 0px 0px #000 !important;
+        }
+        .brutal-click-sm:active {
+            transform: translate(2px, 2px) !important;
+            box-shadow: 0px 0px 0px #000 !important;
+        }
+        .top-bar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            gap: 8px 12px;
+            padding: 8px 4% 8px;
+            z-index: 60;
+            position: relative;
+            min-height: 0;
+            background: var(--app-bg);
+            border-bottom: 2px solid #000;
+        }
+        .dynamic-header {
+            flex: 1 1 auto;
+            min-width: 140px;
+            font-weight: 900;
+            font-size: 18px;
+            line-height: 1;
+            color: var(--blue);
+            letter-spacing: 1px;
+            text-shadow: 1px 1px 0 #000;
+            white-space: nowrap;
+            transition: 0.3s;
+            text-transform: uppercase;
+        }
+        .stats-group {
+            margin-left: auto;
+            margin-top: 2px;
+            display: flex;
+            gap: 6px;
+            z-index: 1;
+            white-space: nowrap;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+        .stat-item {
+            background: #FFF;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 900;
+            font-size: 9px;
+            padding: 3px 5px;
+            border-radius: 6px;
+            border: 2px solid #000;
+            box-shadow: 2px 2px 0 #000;
+            cursor: pointer;
+        }
+        .stat-item .fa-plus-circle {
+            color: #000;
+            font-size: 9px;
+            margin-left: 2px;
+        }
+        .stat-diamond {
+            background: #E0F7FA;
+            color: var(--text-main);
+        }
+        .stat-diamond i.fa-gem {
+            color: var(--diamond);
+            text-shadow: 1px 1px 0 #000;
+        }
+        .stat-coin {
+            background: #FFF9C4;
+            color: var(--text-main);
+        }
+        .stat-coin i.fa-coins {
+            color: var(--coin);
+            text-shadow: 1px 1px 0 #000;
+        }
+        .stat-protip {
+            background: #FCE4EC;
+            color: var(--text-main);
+        }
+        .stat-protip i.fa-lightbulb {
+            color: var(--tips);
+            text-shadow: 1px 1px 0 #000;
+        }
+        .tab-content {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+            padding: 10px 4% 220px;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
+            min-height: 0;
+        }
+        .tab-content.active {
+            display: flex;
+        }
+        .home-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .subject-card {
+            background: var(--primary);
+            border: var(--border-thick);
+            box-shadow: 3px 3px 0 #000;
+            border-radius: var(--brutal-radius);
+            padding: 16px 10px 12px 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            position: relative;
+        }
+        .subject-card:nth-child(2) {
+            background: var(--cyan);
+        }
+        .subject-card:nth-child(3) {
+            background: var(--pink);
+        }
+        .circle-container {
+            position: relative;
+            width: 66px;
+            height: 66px;
+            margin-bottom: 12px;
+        }
+        .circle-progress {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(from 180deg, #000 var(--progress, 0%), transparent 0);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 3px solid #000;
+            background-color: rgba(255, 255, 255, 0.5);
+        }
+        .circle-inner {
+            width: 80%;
+            height: 80%;
+            background: #FFF;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 3px solid #000;
+        }
+        .math-icons-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3px;
+            font-size: 14px;
+            font-weight: 900;
+            text-align: center;
+            color: #000;
+        }
+        .level-badge {
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #FFF;
+            color: #000;
+            font-weight: 900;
+            border-radius: 4px;
+            padding: 1px 7px;
+            font-size: 10px;
+            border: 2px solid #000;
+            white-space: nowrap;
+            box-shadow: 2px 2px 0 #000;
+        }
+        .subject-title {
+            font-size: 13px;
+            font-weight: 900;
+            color: #000;
+            text-align: center;
+            text-transform: uppercase;
+            line-height: 1.2;
+            text-shadow: 1px 1px 0px #FFF;
+        }
+        .streak-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            background: #FFF;
+            padding: 15px;
+            border-radius: var(--brutal-radius);
+            border: var(--border-thick);
+            box-shadow: var(--shadow);
+        }
+        .streak-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .streak-box {
+            width: 50px;
+            height: 50px;
+            border-radius: var(--brutal-radius);
+            background: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 28px;
+            color: var(--text-muted);
+            border: 2px solid #000;
+        }
+        .streak-box.on-fire {
+            background: var(--danger);
+            color: #FFF;
+            text-shadow: 2px 2px 0 #000;
+        }
+        .streak-text {
+            font-size: 20px;
+            font-weight: 900;
+            color: #000;
+        }
+        .btn-claim-halogen {
+            padding: 12px 20px;
+            border-radius: var(--brutal-radius);
+            border: var(--border-thick);
+            font-size: 14px;
+            font-weight: 900;
+            color: #000;
+            cursor: pointer;
+            background: var(--secondary);
+            box-shadow: var(--shadow-sm);
+            text-transform: uppercase;
+        }
+        .btn-claim-halogen.disabled {
+            background: #CBD5E1;
+            color: #64748B;
+            box-shadow: none;
+            cursor: not-allowed;
+            border-color: #94A3B8;
+        }
+        .days-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            padding-bottom: 20px;
+        }
+        .day-box {
+            background: #FFF;
+            border: 2px solid #000;
+            border-radius: 8px;
+            padding: 10px 4px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            box-shadow: 2px 2px 0 #000;
+            transition: 0.2s;
+        }
+        .day-box.current {
+            background: var(--primary);
+            transform: scale(1.05);
+            box-shadow: 4px 4px 0 #000;
+            z-index: 2;
+        }
+        .day-box.claimed {
+            background: #E2E8F0;
+            opacity: 0.7;
+            box-shadow: none;
+            transform: translate(2px, 2px);
+        }
+        .day-num {
+            font-size: 10px;
+            font-weight: 900;
+            margin-bottom: 5px;
+            border-bottom: 2px solid #000;
+            width: 100%;
+            text-transform: uppercase;
+            padding-bottom: 2px;
+        }
+        .day-icon {
+            font-size: 20px;
+            margin: 5px 0;
+            text-shadow: 1px 1px 0 #000;
+        }
+        .day-val {
+            font-size: 11px;
+            font-weight: 900;
+        }
+        .check-mark {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--secondary);
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            color: #000;
+            border: 2px solid #000;
+            z-index: 5;
+        }
+        .day-box.claimed .check-mark {
+            display: flex;
+        }
+        .mission-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            padding-bottom: 20px;
+            margin-top: 5px;
+        }
+        .m-card {
+            background: #FFF;
+            border: var(--border-thick);
+            box-shadow: var(--shadow);
+            border-radius: var(--brutal-radius);
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+        }
+        .m-card.ready-mission {
+            animation: missionGlow 1.2s ease-in-out infinite alternate;
+            box-shadow: var(--shadow), 0 0 0 4px rgba(255, 222, 89, 0.35);
+        }
+        .m-card.ready-mission .m-btn.ready {
+            animation: pulseYellowTips 1.5s infinite;
+        }
+        .m-card.claimed-mission {
+            opacity: 0.98;
+            background: #F8FAFC;
+        }
+        .m-card.completed-mission {
+            background: #FFF7D6;
+        }
+        @keyframes missionGlow {
+            from {
+                transform: translateY(0);
+                box-shadow: var(--shadow);
+            }
+            to {
+                transform: translateY(-2px);
+                box-shadow: 6px 6px 0 #000;
+            }
+        }
+        .m-icon-box {
+            width: 46px;
+            height: 46px;
+            border-radius: 8px;
+            background: var(--bg-color);
+            border: 2px solid #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            text-shadow: 1px 1px 0 #000;
+        }
+        .m-info {
+            flex: 1;
+        }
+        .m-title {
+            font-weight: 900;
+            font-size: 13px;
+            color: #000;
+            margin-bottom: 5px;
+            line-height: 1.2;
+            text-transform: uppercase;
+        }
+        .m-prog-bg {
+            width: 100%;
+            height: 12px;
+            background: #E2E8F0;
+            border-radius: 4px;
+            border: 2px solid #000;
+            overflow: hidden;
+            margin-bottom: 5px;
+        }
+        .m-prog-fill {
+            height: 100%;
+            background: var(--secondary);
+            width: 0%;
+            transition: 0.5s;
+            border-right: 2px solid #000;
+        }
+        .m-reward {
+            font-size: 13px;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .m-btn {
+            background: #E2E8F0;
+            border: 2px solid #000;
+            border-radius: 6px;
+            padding: 7px 10px;
+            font-weight: 900;
+            font-size: 10px;
+            color: #000;
+            cursor: not-allowed;
+            white-space: nowrap;
+            text-transform: uppercase;
+        }
+        .m-btn.ready {
+            background: var(--primary);
+            box-shadow: var(--shadow-sm);
+            cursor: pointer;
+        }
+        .rank-hero {
+            background: var(--blue);
+            border: var(--border-thick);
+            box-shadow: var(--shadow);
+            border-radius: var(--brutal-radius);
+            padding: 18px 14px;
+            text-align: center;
+            margin: 5px 0 25px 0;
+            color: #FFF;
+            position: relative;
+        }
+        .r-hero-icon {
+            font-size: 56px;
+            margin-bottom: 15px;
+            text-shadow: 4px 4px 0 #000;
+            color: var(--primary);
+        }
+        .r-hero-name {
+            font-size: 22px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 0 #000;
+        }
+        .r-hero-pts {
+            font-size: 13px;
+            font-weight: 900;
+            margin-bottom: 20px;
+            background: #000;
+            display: inline-block;
+            padding: 4px 15px;
+            border-radius: 20px;
+        }
+        .r-prog-bg {
+            width: 100%;
+            height: 16px;
+            background: #FFF;
+            border-radius: 8px;
+            border: 2px solid #000;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+        .r-prog-fill {
+            height: 100%;
+            background: var(--danger);
+            width: 0%;
+            transition: 1s;
+            border-right: 2px solid #000;
+        }
+        .rank-list-title {
+            font-size: 15px;
+            font-weight: 900;
+            color: #000;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            border-bottom: 3px solid #000;
+            display: inline-block;
+            padding-bottom: 5px;
+        }
+        .rank-board {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding-bottom: 20px;
+        }
+        .r-tier-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #FFF;
+            padding: 12px;
+            border-radius: 8px;
+            border: 2px solid #000;
+            opacity: 0.6;
+        }
+        .r-tier-item.active-tier {
+            border: var(--border-thick);
+            opacity: 1;
+            background: var(--primary);
+            box-shadow: var(--shadow);
+            transform: scale(1.02);
+        }
+        .r-tier-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .r-tier-icon {
+            font-size: 28px;
+            width: 40px;
+            text-align: center;
+            text-shadow: 1px 1px 0 #000;
+        }
+        .r-tier-name {
+            font-size: 14px;
+            font-weight: 900;
+            color: #000;
+            text-transform: uppercase;
+        }
+        .r-tier-req {
+            font-size: 13px;
+            font-weight: 900;
+            color: var(--text-muted);
+        }
+        .r-tier-reward {
+            font-size: 11px;
+            font-weight: 900;
+            color: var(--coin);
+            text-align: right;
+            white-space: nowrap;
+        }
+        .shop-subnav {
+            position: sticky;
+            top: 0;
+            z-index: 35;
+            display: flex;
+            background: var(--app-bg);
+            border: var(--border-thick);
+            border-radius: 8px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin-bottom: 10px;
+            box-shadow: var(--shadow-sm);
+            flex-wrap: nowrap;
+            scrollbar-width: none;
+        }
+        .shop-subnav::-webkit-scrollbar {
+            display: none;
+        }
+        .shop-tab-btn {
+            flex: 1 0 auto;
+            min-width: max-content;
+            padding: 10px 14px;
+            text-align: center;
+            font-weight: 900;
+            font-size: 11px;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            text-transform: uppercase;
+            border-right: 2px solid #000;
+            transition: 0.2s;
+            white-space: nowrap;
+        }
+        .shop-tab-btn:last-child {
+            border-right: none;
+        }
+        .shop-tab-btn.active {
+            background: var(--primary);
+            color: #000;
+        }
+        .cat-items-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+        .cat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            background: #FFF;
+            padding: 12px 8px;
+            border-radius: 8px;
+            border: var(--border-thick);
+            box-shadow: 3px 3px 0 #000;
+            gap: 8px;
+            position: relative;
+        }
+        .r-item-name {
+            font-weight: 900;
+            font-size: 13px;
+            color: #000;
+            text-transform: uppercase;
+        }
+        .r-item-cost {
+            font-size: 12px;
+            font-weight: 900;
+            color: #000;
+            display: flex;
+            gap: 5px;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
+            background: #E2E8F0;
+            padding: 3px 8px;
+            border-radius: 6px;
+            border: 2px solid #000;
+        }
+        .btn-claim-reward {
+            width: 100%;
+            background: var(--blue);
+            color: #FFF;
+            border: 2px solid #000;
+            padding: 10px;
+            border-radius: 6px;
+            font-weight: 900;
+            cursor: pointer;
+            font-size: 12px;
+            text-transform: uppercase;
+            box-shadow: var(--shadow-sm);
+        }
+        .btn-claim-reward.disabled {
+            background: #94A3B8 !important;
+            color: #475569 !important;
+            box-shadow: none !important;
+            cursor: not-allowed;
+            border-color: #64748B !important;
+            transform: none !important;
+        }
+        .gacha-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 0;
+        }
+        .spin-display-area {
+            width: 100%;
+            min-height: 150px;
+            border: 4px solid #000;
+            background: #FFF;
+            border-radius: 12px;
+            box-shadow: 5px 5px 0 #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            padding: 10px;
+        }
+        .spin-grid-1 {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            font-size: 20px;
+            font-weight: 900;
+            text-transform: uppercase;
+            text-align: center;
+            color: var(--danger);
+            text-shadow: 2px 2px 0 #000;
+        }
+        .spin-grid-10 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            width: 100%;
+            text-align: center;
+            font-weight: 900;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+        .spin-item {
+            background: var(--bg-color);
+            border: 2px solid #000;
+            padding: 8px;
+            border-radius: 6px;
+            box-shadow: 2px 2px 0 #000;
+        }
+        .gacha-controls {
+            display: flex;
+            width: 100%;
+            justify-content: space-between;
+            margin-top: 10px;
+            gap: 10px;
+        }
+        .btn-spin {
+            flex: 1;
+            padding: 10px 4px;
+            font-weight: 900;
+            font-size: 12px;
+            text-transform: uppercase;
+            border: 3px solid #000;
+            border-radius: 8px;
+            box-shadow: 3px 3px 0 #000;
+            cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+        .btn-spin:active {
+            transform: translate(4px, 4px) !important;
+            box-shadow: 0px 0px 0px #000 !important;
+        }
+        .btn-spin:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: 4px 4px 0 #000 !important;
+        }
+        .btn-spin-1 {
+            background: var(--primary);
+            color: #000;
+        }
+        .btn-spin-10 {
+            background: var(--pink);
+            color: #000;
+        }
+        .history-filters {
+            position: sticky;
+            top: 0;
+            z-index: 35;
+            background: var(--app-bg);
+            padding: 8px 0 12px;
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin-bottom: 10px;
+            border-bottom: 3px solid #000;
+            flex-wrap: nowrap;
+            scrollbar-width: none;
+        }
+        .history-filters::-webkit-scrollbar {
+            display: none;
+        }
+        .history-filter-btn {
+            flex: 0 0 auto;
+            padding: 8px 12px;
+            border: 2px solid #000;
+            border-radius: 8px;
+            background: #FFF;
+            box-shadow: 2px 2px 0 #000;
+            font-weight: 900;
+            text-transform: uppercase;
+            font-size: 10px;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+        .history-filter-btn.active {
+            background: var(--primary);
+        }
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding-bottom: 20px;
+            margin-top: 5px;
+        }
+        .h-item {
+            background: #FFF;
+            border: var(--border-thick);
+            box-shadow: var(--shadow);
+            border-radius: 8px;
+            padding: 12px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .h-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .h-game {
+            font-weight: 900;
+            color: #000;
+            font-size: 13px;
+            text-transform: uppercase;
+        }
+        .h-status {
+            font-size: 10px;
+            font-weight: 900;
+            padding: 3px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            border: 2px solid #000;
+            box-shadow: 2px 2px 0 #000;
+        }
+        .h-status.success {
+            background: var(--secondary);
+            color: #000;
+        }
+        .h-status.pending {
+            background: var(--primary);
+            color: #000;
+        }
+        .h-status.failed {
+            background: var(--danger);
+            color: #FFF;
+        }
+        .h-cost {
+            font-size: 13px;
+            font-weight: 900;
+            color: #000;
+        }
+        .h-gain {
+            font-size: 14px;
+            font-weight: 900;
+            color: var(--blue);
+        }
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #FFF;
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0 10px;
+            border-top: var(--border-thick);
+            z-index: 40;
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--text-muted);
+            font-size: 10px;
+            font-weight: 900;
+            gap: 4px;
+            cursor: pointer;
+            transition: 0.2s;
+            width: 52px;
+            text-transform: uppercase;
+            position: relative;
+        }
+        .nav-item i {
+            font-size: 18px;
+            transition: 0.3s;
+            color: #000;
+            -webkit-text-stroke: 1px #000;
+            color: transparent;
+        }
+        .nav-item.active {
+            color: #000;
+        }
+        .nav-item.active i {
+            transform: translateY(-5px) scale(1.1);
+            color: var(--blue);
+            -webkit-text-stroke: 1px #000;
+            text-shadow: 2px 2px 0 #000;
+        }
+        .nav-badge {
+            position: absolute;
+            top: -5px;
+            right: 10px;
+            width: 12px;
+            height: 12px;
+            background: var(--danger);
+            border-radius: 50%;
+            border: 2px solid #000;
+            display: none;
+            z-index: 5;
+            box-shadow: 1px 1px 0 #000;
+            animation: popIn 0.5s infinite alternate;
+        }
+        #game-screen {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg-color);
+            z-index: 50;
+        }
+        .game-top {
+            display: flex;
+            align-items: center;
+            padding: 8px 4%;
+            margin-bottom: 6px;
+            border-bottom: var(--border-thick);
+            background: #FFF;
+        }
+        .game-top .back-btn {
+            font-size: 20px;
+            color: #000;
+            cursor: pointer;
+            width: 28px;
+            margin-right: 6px;
+        }
+        .game-top .game-title-text {
+            font-weight: 900;
+            font-size: 13px;
+            color: var(--blue);
+            margin-right: auto;
+            text-transform: uppercase;
+            letter-spacing: 0;
+            text-shadow: 1px 1px 0 #000;
+        }
+        .game-top .tools-row {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            position: relative;
+        }
+        .game-top .t-btn {
+            background: #FFF;
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #000;
+            font-size: 14px;
+            border: 2px solid #000;
+            box-shadow: var(--shadow-sm);
+            cursor: pointer;
+            position: relative;
+        }
+        .game-top .t-btn.active {
+            background: var(--primary);
+            transform: translate(2px, 2px);
+            box-shadow: 0 0 0 #000;
+        }
+        .tips-bubble {
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--text-main);
+            color: #FFF;
+            font-size: 9px;
+            font-weight: 900;
+            padding: 4px 8px;
+            border-radius: 4px;
+            animation: floatUpDown 2s infinite;
+            pointer-events: none;
+            white-space: nowrap;
+            border: 2px solid #000;
+            text-transform: uppercase;
+            z-index: 100;
+        }
+        @keyframes floatUpDown {
+            0%,
+            100% {
+                transform: translateX(-50%) translateY(0);
+            }
+            50% {
+                transform: translateX(-50%) translateY(-4px);
+            }
+        }
+        .game-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 0 4% 8px;
+            overflow: hidden;
+        }
+        #loading-overlay {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+        }
+        .spinner {
+            border: 6px solid #FFF;
+            border-top: 6px solid #000;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 20px;
+            box-shadow: 0 0 0 3px #000;
+        }
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        #q-core-area {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            width: 100%;
+            transform-origin: top center;
+        }
+        .q-head-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            margin-top: 4px;
+        }
+        .q-prompt {
+            font-size: 14px;
+            color: #000;
+            font-weight: 900;
+            text-transform: uppercase;
+            border-bottom: 3px solid #000;
+            padding-bottom: 5px;
+        }
+        .q-counter-pill {
+            background: var(--primary);
+            padding: 5px 9px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 900;
+            color: #000;
+            border: 2px solid #000;
+            box-shadow: var(--shadow-sm);
+        }
+        .visual-area {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 10px;
+            min-height: 56px;
+        }
+        .visual-group {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+            font-size: 24px;
+            color: #000;
+            justify-items: center;
+            text-shadow: 2px 2px 0 #FFF;
+        }
+        .eq-display {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            font-size: 22px;
+            font-weight: 900;
+            margin-bottom: 12px;
+            min-height: auto;
+            text-align: center;
+            position: relative;
+            color: #000;
+            text-shadow: 2px 2px 0 #FFF;
+            flex-wrap: wrap;
+        }
+        .ans-box {
+            width: 52px;
+            height: 52px;
+            border-radius: 8px;
+            border: 3px dashed #000;
+            background: #FFF;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #000;
+            font-size: 24px;
+            font-weight: 900;
+            transition: 0.2s;
+            position: relative;
+            min-width: 40px;
+        }
+        .ans-box.selected {
+            border: 3px solid #000;
+            box-shadow: 4px 4px 0 #000;
+            background: var(--primary);
+        }
+        .ans-box.wrong-flash {
+            border: 3px solid #000 !important;
+            background: var(--danger) !important;
+            color: #FFF !important;
+            box-shadow: 4px 4px 0 #000 !important;
+        }
+        .ans-box.correct-flash {
+            border: 3px solid #000 !important;
+            background: var(--secondary) !important;
+            color: #000 !important;
+            box-shadow: 4px 4px 0 #000 !important;
+        }
+        .ans-box.show-correct-next {
+            border: 3px solid #000 !important;
+            background: var(--secondary) !important;
+            color: #000 !important;
+            box-shadow: 0 0 0 4px #000 !important;
+            display: inline-flex;
+            margin-left: 15px;
+        }
+        .fraction-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 24px;
+            font-weight: 900;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .fraction {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 16px;
+            line-height: 1;
+        }
+        .fraction .f-bar {
+            width: 100%;
+            border-top: 3px solid #000;
+            margin: 4px 0;
+        }
+        .logic-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #fff;
+            border: 3px solid #000;
+            border-radius: 999px;
+            padding: 4px 8px;
+            box-shadow: 2px 2px 0 #000;
+            font-weight: 900;
+            text-transform: uppercase;
+            font-size: 10px;
+        }
+        .controls-area {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: auto;
+        }
+        .numpad-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+        .mcq-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        .np-btn {
+            background: #FFF;
+            border: 3px solid #000;
+            border-radius: 8px;
+            padding: 11px;
+            font-size: 15px;
+            font-weight: 900;
+            color: #000;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 2px 2px 0 #000;
+            transition: 0.15s;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .np-btn.purple-glow {
+            animation: purpleGlow 0.8s ease-in-out infinite;
+            border-color: var(--purple);
+        }
+        .tf-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .tf-btn {
+            background: #FFF;
+            border: 4px solid #000;
+            border-radius: 12px;
+            padding: 16px;
+            font-size: 26px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 4px 4px 0 #000;
+        }
+        .np-btn.selected,
+        .tf-btn.selected {
+            background: var(--primary);
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0 #000;
+        }
+        .opt-correct {
+            border-color: #000 !important;
+            background: var(--secondary) !important;
+            color: #000 !important;
+            box-shadow: none !important;
+            transform: translate(4px, 4px) !important;
+        }
+        .opt-wrong {
+            border-color: #000 !important;
+            background: var(--danger) !important;
+            color: #FFF !important;
+            box-shadow: none !important;
+            transform: translate(4px, 4px) !important;
+        }
+        .opt-show-correct {
+            border-color: #000 !important;
+            background: var(--secondary) !important;
+            box-shadow: 0 0 0 4px #000 !important;
+        }
+        @keyframes pulseYellowTips {
+            0% {
+                box-shadow: 0 0 0 0 rgba(0, 0, 0, 1);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(0, 0, 0, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+            }
+        }
+        .tips-pulse-yellow {
+            animation: pulseYellowTips 1.5s infinite !important;
+            background: var(--pink) !important;
+            color: #000 !important;
+            border: 3px solid #000 !important;
+        }
+        .tips-pulse-yellow i {
+            color: #000 !important;
+        }
+        .tips-btn.active-tip {
+            background: var(--pink) !important;
+            color: #000 !important;
+        }
+        .tips-btn.active-tip i {
+            color: #000 !important;
+        }
+        .tips-indicator-box {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            min-width: 45px;
+            height: 45px;
+            border-radius: 8px;
+            background: var(--purple);
+            border: 3px solid #000;
+            font-size: 24px;
+            font-weight: 900;
+            color: #FFF;
+            animation: purpleGlow 0.8s ease-in-out infinite;
+            position: absolute;
+            right: -55px;
+            box-shadow: 4px 4px 0 #000;
+            padding: 4px 10px;
+            z-index: 10;
+        }
+        .prog-track {
+            width: 100%;
+            height: 10px;
+            background: #FFF;
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 5px 0;
+            border: 3px solid #000;
+            box-shadow: 2px 2px 0 #000;
+        }
+        .prog-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--blue);
+            transition: width 0.3s;
+            border-right: 3px solid #000;
+        }
+        .periksa-btn {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 4px solid #000;
+            font-size: 14px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            background: #CBD5E1;
+            color: #64748B;
+            cursor: not-allowed;
+            box-shadow: none;
+            margin-top: 10px;
+        }
+        .periksa-btn.ready {
+            background: var(--primary);
+            color: #000;
+            cursor: pointer;
+            box-shadow: 4px 4px 0 #000;
+        }
+        .periksa-btn.correct-btn {
+            background: var(--secondary);
+            color: #000;
+            box-shadow: 4px 4px 0 #000;
+        }
+        .periksa-btn.wrong-btn {
+            background: var(--danger);
+            color: #FFF;
+            box-shadow: 4px 4px 0 #000;
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(2px);
+            z-index: 1200;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+        }
+        .unified-modal {
+            background: #FFF;
+            width: 100%;
+            max-width: 380px;
+            max-height: 88vh;
+            border-radius: 12px;
+            border: 4px solid #000;
+            padding: 18px 14px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            z-index: 1201;
+            box-shadow: 10px 10px 0 #000;
+            overflow-y: auto;
+            text-align: center;
+        }
+        .um-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 35px;
+            height: 35px;
+            background: var(--danger);
+            border: 3px solid #000;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #FFF;
+            font-size: 18px;
+            cursor: pointer;
+            box-shadow: 2px 2px 0 #000;
+            z-index: 1202;
+            pointer-events: auto;
+        }
+        .um-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .um-icon {
+            font-size: 52px;
+            margin-bottom: 10px;
+            text-shadow: 3px 3px 0 #000;
+        }
+        .um-title {
+            font-size: 20px;
+            font-weight: 900;
+            color: #000;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            line-height: 1.1;
+        }
+        .um-desc {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-weight: 700;
+            line-height: 1.4;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            text-align: left;
+            margin-bottom: 15px;
+        }
+        .form-label {
+            font-size: 14px;
+            font-weight: 900;
+            color: #000;
+            text-transform: uppercase;
+        }
+        .form-input {
+            background: #FFF;
+            border: 3px solid #000;
+            border-radius: 8px;
+            padding: 15px;
+            color: #000;
+            font-size: 16px;
+            font-weight: 700;
+            outline: none;
+            box-shadow: inset 2px 2px 0 rgba(0, 0, 0, 0.1);
+            width: 100%;
+        }
+        .form-input:focus {
+            background: var(--primary);
+        }
+        .um-data-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 2px dashed #000;
+            font-size: 14px;
+        }
+        .um-data-row:last-child {
+            border-bottom: none;
+        }
+        .um-data-label {
+            color: var(--text-muted);
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+        .um-data-val {
+            color: #000;
+            font-weight: 900;
+            text-align: right;
+        }
+        .um-btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 18px;
+        }
+        .um-btn {
+            flex: 1;
+            padding: 13px;
+            border-radius: 8px;
+            border: 3px solid #000;
+            font-size: 14px;
+            font-weight: 900;
+            cursor: pointer;
+            text-transform: uppercase;
+            box-shadow: 4px 4px 0 #000;
+        }
+        .um-btn-primary {
+            background: var(--blue);
+            color: #FFF;
+        }
+        .um-btn-secondary {
+            background: #FFF;
+            color: #000;
+        }
+        .um-btn-danger {
+            background: var(--danger);
+            color: #FFF;
+        }
+        .fs-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg-color);
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            max-width: 480px;
+            margin: auto;
+        }
+        .rank-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            text-align: center;
+            padding: 5%;
+            background: var(--app-bg);
+            border-left: var(--border-thick);
+            border-right: var(--border-thick);
+        }
+        .rank-icon {
+            font-size: 120px;
+            text-shadow: 6px 6px 0 #000;
+            margin-bottom: 25px;
+            color: var(--primary);
+        }
+        .rank-name {
+            font-size: 36px;
+            font-weight: 900;
+            color: #000;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 0 #FFF;
+        }
+        .rank-pts {
+            font-size: 18px;
+            color: #000;
+            font-weight: 900;
+            margin-bottom: 30px;
+            background: var(--primary);
+            padding: 5px 20px;
+            border: 3px solid #000;
+            border-radius: 20px;
+            box-shadow: 4px 4px 0 #000;
+        }
+        .rank-bar-bg {
+            width: 100%;
+            height: 20px;
+            background: #FFF;
+            border-radius: 10px;
+            border: 3px solid #000;
+            overflow: hidden;
+            margin-bottom: 15px;
+            box-shadow: inset 2px 2px 0 rgba(0, 0, 0, 0.2);
+        }
+        .rank-bar-fill {
+            height: 100%;
+            background: var(--danger);
+            transition: 1s;
+            width: 0%;
+            border-right: 3px solid #000;
+        }
+        .claim-box {
+            background: #FFF;
+            border: 4px solid #000;
+            border-radius: 12px;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            box-shadow: 6px 6px 0 #000;
+        }
+        .claim-val {
+            font-size: 28px;
+            font-weight: 900;
+            color: var(--coin);
+            text-shadow: 2px 2px 0 #000;
+        }
+        #calc-modal {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1300;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+            pointer-events: auto;
+        }
+        .calc-body {
+            background: var(--app-bg);
+            width: 100%;
+            max-width: 340px;
+            border-radius: 12px;
+            border: 4px solid #000;
+            padding: 14px;
+            box-shadow: 8px 8px 0 #000;
+        }
+        .calc-header {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 900;
+            margin-bottom: 20px;
+            color: #000;
+            font-size: 20px;
+            text-transform: uppercase;
+        }
+        .calc-close-btn {
+            cursor: pointer;
+            background: var(--danger);
+            border: 3px solid #000;
+            border-radius: 8px;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 2px 2px 0 #000;
+            z-index: 100;
+            pointer-events: auto;
+        }
+        .calc-screen {
+            background: #FFF;
+            border-radius: 8px;
+            padding: 14px;
+            font-size: 28px;
+            text-align: right;
+            overflow-x: auto;
+            margin-bottom: 20px;
+            border: 3px solid #000;
+            color: #000;
+            font-weight: 900;
+            box-shadow: inset 3px 3px 0 rgba(0, 0, 0, 0.1);
+        }
+        .c-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+        .c-btn {
+            background: #FFF;
+            color: #000;
+            border: 3px solid #000;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: 900;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 2px 2px 0 #000;
+        }
+        .c-btn:active {
+            box-shadow: 0 0 0 #000;
+            transform: translate(4px, 4px);
+        }
+        .c-op {
+            background: var(--primary);
+        }
+        .c-clear {
+            background: var(--danger);
+            color: #FFF;
+        }
+        .c-pro {
+            background: #E2E8F0;
+            font-size: 14px;
+        }
+        #canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1250;
+            display: none;
+            background-color: rgba(255, 255, 255, 0.9);
+        }
+        canvas {
+            width: 100%;
+            height: 100%;
+            touch-action: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 56;
+        }
+        .canvas-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 45px;
+            height: 45px;
+            background: var(--danger);
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            color: #FFF;
+            z-index: 1000;
+            cursor: pointer;
+            border: 3px solid #000;
+            box-shadow: 4px 4px 0 #000;
+            pointer-events: auto;
+        }
+        .drawing-tools {
+            position: absolute;
+            bottom: 6vh;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            background: #FFF;
+            padding: 10px;
+            border-radius: 12px;
+            border: 4px solid #000;
+            box-shadow: 8px 8px 0 #000;
+            z-index: 58;
+        }
+        .d-btn {
+            background: #FFF;
+            border: 3px solid #000;
+            color: #000;
+            font-size: 20px;
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 4px 4px 0 #000;
+        }
+        .d-btn.active {
+            background: var(--cyan);
+        }
+        .info-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #E0F2FE;
+            border: 2px solid #000;
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 11px;
+            font-weight: 900;
+            color: var(--blue);
+            cursor: pointer;
+            box-shadow: 2px 2px 0 #000;
+            white-space: nowrap;
+            margin-right: 8px;
+        }
+        .info-badge i {
+            font-size: 14px;
+        }
+        .retry-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--danger);
+            color: #FFF;
+            border: 3px solid #000;
+            border-radius: 8px;
+            padding: 10px 18px;
+            font-weight: 900;
+            font-size: 13px;
+            cursor: pointer;
+            box-shadow: 4px 4px 0 #000;
+            text-transform: uppercase;
+            margin-top: 15px;
+        }
+        .season-countdown {
+            background: #FFF;
+            border: 2px solid #000;
+            border-radius: 8px;
+            padding: 8px 14px;
+            font-weight: 900;
+            font-size: 11px;
+            color: var(--danger);
+            text-align: center;
+            box-shadow: 2px 2px 0 #000;
+            margin-top: 8px;
+            text-transform: uppercase;
+        }
+        html,
+        body {
+            overscroll-behavior: none;
+        }
+        #app {
+            max-width: 480px;
+        }
+        @media (max-width: 380px) {
+            .dynamic-header {
+                font-size: 16px !important;
+            }
+            .stat-item {
+                font-size: 8px !important;
+            }
+            .nav-item {
+                width: 48px !important;
+            }
+            .subject-title {
+                font-size: 12px !important;
+            }
+            .q-prompt {
+                font-size: 13px !important;
+            }
+            .eq-display {
+                font-size: 20px !important;
+            }
+            .np-btn {
+                font-size: 14px !important;
+                padding: 10px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="top-bar" id="global-top-bar">
+            <div class="dynamic-header" id="top-bar-title">M A T H</div>
+            <div class="stats-group" id="global-stats">
+                <div class="stat-item stat-diamond" onclick="showUnifiedModal('buy_dm')"><i class="fas fa-gem"></i> <span class="global-diamond">0</span> <i class="fas fa-plus-circle"></i></div>
+                <div class="stat-item stat-coin" onclick="switchTab('misi', document.querySelectorAll('.nav-item')[2])"><i class="fas fa-coins"></i> <span class="global-coin">0</span> <i class="fas fa-plus-circle"></i></div>
+                <div class="stat-item stat-protip" onclick="handleTipClick()"><i class="fas fa-lightbulb"></i> <span id="global-protips">0</span> <i class="fas fa-plus-circle"></i></div>
+            </div>
+        </div>
+        <div id="tab-home" class="tab-content active bouncy">
+            <div class="home-grid">
+                <div class="subject-card brutal-click-sm" onclick="startGame('Matematika Dasar')"><div class="circle-container"><div class="circle-progress" id="home-circle-mtk" style="--progress: 0%;"><div class="circle-inner"><div class="math-icons-grid"><span><i class="fas fa-plus"></i></span><span><i class="fas fa-minus"></i></span><span><i class="fas fa-times"></i></span><span><i class="fas fa-divide"></i></span></div></div></div><div class="level-badge">Lv. <span id="home-level-mtk">1</span></div></div><div class="subject-title">Matematika Dasar</div></div>
+                <div class="subject-card brutal-click-sm" onclick="startGame('Aljabar Dasar')"><div class="circle-container"><div class="circle-progress" id="home-circle-alj" style="--progress: 0%;"><div class="circle-inner" style="font-size:28px;font-weight:900;font-style:italic;">x y</div></div><div class="level-badge">Lv. <span id="home-level-alj">1</span></div></div><div class="subject-title">Aljabar Dasar</div></div>
+                <div class="subject-card brutal-click-sm" onclick="startGame('Logika Pecahan')"><div class="circle-container"><div class="circle-progress" id="home-circle-pch" style="--progress: 0%;"><div class="circle-inner" style="font-size:22px;font-weight:900;"><div style="display:flex;flex-direction:column;align-items:center;"><span>½</span><hr style="width:24px;border:1.5px solid #000;margin:2px 0;"><span>¼</span></div></div></div><div class="level-badge">Lv. <span id="home-level-pch">1</span></div></div><div class="subject-title">Logika Pecahan</div></div>
+                <div class="subject-card brutal-click-sm" onclick="startGame('Pola Bilangan')"><div class="circle-container"><div class="circle-progress" id="home-circle-pola" style="--progress: 0%;"><div class="circle-inner" style="font-size:28px;font-weight:900;">1 2 4</div></div><div class="level-badge">Lv. <span id="home-level-pola">1</span></div></div><div class="subject-title">Pola Bilangan</div></div>
+                <div class="subject-card brutal-click-sm" onclick="startGame('Tebak Logika')"><div class="circle-container"><div class="circle-progress" id="home-circle-logika" style="--progress: 0%;"><div class="circle-inner" style="font-size:24px;font-weight:900;">?</div></div><div class="level-badge">Lv. <span id="home-level-logika">1</span></div></div><div class="subject-title">Tebak Logika</div></div>
+            </div>
+        </div>
+        <div id="tab-halogen" class="tab-content">
+            <div class="streak-container brutal-click-sm"><div class="streak-info"><div class="streak-box" id="streak-box"><i class="fas fa-fire"></i></div><div><div style="font-size:12px;font-weight:900;color:var(--text-muted);text-transform:uppercase;">Login Beruntun</div><div class="streak-text"><span id="streak-counter">1</span> Hari</div></div></div><button id="btn-login-claim" class="btn-claim-halogen brutal-click" onclick="claimLoginReward()">KLAIM</button></div>
+            <div style="font-size:12px;color:var(--danger);font-weight:900;margin-bottom:15px;text-align:right;">*Reset ke hari 1 jika bolos!</div>
+            <div class="days-grid" id="halogen-grid"></div>
+        </div>
+        <div id="tab-misi" class="tab-content">
+            <div style="background:var(--primary);border:3px solid #000;padding:10px;border-radius:8px;text-align:center;font-weight:900;margin-bottom:10px;box-shadow:4px 4px 0 #000;text-transform:uppercase;"><i class="fas fa-sync-alt"></i> Misi Direset Setiap Hari!</div>
+            <div class="mission-list" id="mission-container"></div>
+        </div>
+        <div id="tab-rank" class="tab-content">
+            <div class="rank-hero"><i class="fas fa-khanda r-hero-icon" id="tab-r-icon" style="color:#A1662F;"></i><div class="r-hero-name" id="tab-r-name">Warrior</div><div class="r-hero-pts"><span id="tab-r-pts">0</span> / <span id="tab-r-max">1000</span> Pts</div><div class="r-prog-bg"><div class="r-prog-fill" id="tab-r-bar"></div></div><div class="season-countdown" id="season-countdown">Season berakhir dalam: <span id="season-timer">--</span></div></div>
+            <div class="rank-list-title">Tingkatan Rank</div>
+            <div class="rank-board" id="rank-board-list"></div>
+        </div>
+        <div id="tab-reward" class="tab-content">
+            <div class="shop-subnav"><button class="shop-tab-btn active brutal-click-sm" id="btn-tab-penukaran" onclick="switchShopTab('penukaran')">Penukaran</button><button class="shop-tab-btn brutal-click-sm" id="btn-tab-topup" onclick="switchShopTab('topup')">Top Up</button><button class="shop-tab-btn brutal-click-sm" id="btn-tab-spin" onclick="switchShopTab('spin')">Spin Item</button></div>
+            <div id="shop-sec-penukaran">
+                <div class="reward-category bouncy" style="margin-top:5px;"><div class="cat-header" style="color:var(--blue);font-weight:900;text-transform:uppercase;font-size:16px;margin-bottom:10px;border-bottom:3px solid #000;padding-bottom:5px;display:inline-block;"><img src="https://upload.wikimedia.org/wikipedia/en/thumb/1/1d/Mobile_Legends_Bang_Bang_logo.png/320px-Mobile_Legends_Bang_Bang_logo.png" alt="ML" style="height:18px;vertical-align:middle;margin-right:5px;background:#FFF;border:2px solid #000;border-radius:4px;"> Mobile Legends</div><div class="cat-items-grid"><div class="cat-item"><div class="r-item-name">12 Diamonds</div><div class="r-item-cost"><i class="fas fa-coins" style="color:var(--coin)"></i> 400.000</div><button class="btn-claim-reward btn-topup-game brutal-click" data-coin="400000" onclick="openTopupModal('Mobile Legends','12 Diamonds','https://upload.wikimedia.org/wikipedia/en/thumb/1/1d/Mobile_Legends_Bang_Bang_logo.png/320px-Mobile_Legends_Bang_Bang_logo.png',400000,'ml')">Tukar</button></div><div class="cat-item"><div class="r-item-name">86 Diamonds</div><div class="r-item-cost"><i class="fas fa-coins" style="color:var(--coin)"></i> 2.400.000</div><button class="btn-claim-reward btn-topup-game brutal-click" data-coin="2400000" onclick="openTopupModal('Mobile Legends','86 Diamonds','https://upload.wikimedia.org/wikipedia/en/thumb/1/1d/Mobile_Legends_Bang_Bang_logo.png/320px-Mobile_Legends_Bang_Bang_logo.png',2400000,'ml')">Tukar</button></div></div></div>
+                <div class="reward-category bouncy" style="animation-delay:0.1s;"><div class="cat-header" style="color:var(--danger);font-weight:900;text-transform:uppercase;font-size:16px;margin-bottom:10px;border-bottom:3px solid #000;padding-bottom:5px;display:inline-block;"><img src="https://upload.wikimedia.org/wikipedia/id/thumb/e/e4/Free_Fire_logo.png/320px-Free_Fire_logo.png" alt="FF" style="height:18px;vertical-align:middle;margin-right:5px;background:#FFF;border:2px solid #000;border-radius:4px;"> Free Fire</div><div class="cat-items-grid"><div class="cat-item"><div class="r-item-name">70 Diamonds</div><div class="r-item-cost"><i class="fas fa-coins" style="color:var(--coin)"></i> 1.000.000</div><button class="btn-claim-reward btn-topup-game brutal-click" data-coin="1000000" onclick="openTopupModal('Free Fire','70 Diamonds','https://upload.wikimedia.org/wikipedia/id/thumb/e/e4/Free_Fire_logo.png/320px-Free_Fire_logo.png',1000000,'ff')">Tukar</button></div><div class="cat-item"><div class="r-item-name">140 Diamonds</div><div class="r-item-cost"><i class="fas fa-coins" style="color:var(--coin)"></i> 2.000.000</div><button class="btn-claim-reward btn-topup-game brutal-click" data-coin="2000000" onclick="openTopupModal('Free Fire','140 Diamonds','https://upload.wikimedia.org/wikipedia/id/thumb/e/e4/Free_Fire_logo.png/320px-Free_Fire_logo.png',2000000,'ff')">Tukar</button></div></div></div>
+                <div class="reward-category bouncy" style="animation-delay:0.2s;"><div class="cat-header" style="color:#000;font-weight:900;text-transform:uppercase;font-size:16px;margin-bottom:10px;border-bottom:3px solid #000;padding-bottom:5px;display:inline-block;"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Roblox_player_icon_black.svg/320px-Roblox_player_icon_black.svg.png" style="height:18px;vertical-align:middle;margin-right:5px;background:#FFF;border:2px solid #000;border-radius:4px;" alt="RB"> Roblox</div><div class="cat-items-grid"><div class="cat-item"><div class="r-item-name">30 Robux</div><div class="r-item-cost"><i class="fas fa-coins" style="color:var(--coin)"></i> 600.000</div><button class="btn-claim-reward btn-topup-game brutal-click" data-coin="600000" onclick="openTopupModal('Roblox','30 Robux','https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Roblox_player_icon_black.svg/320px-Roblox_player_icon_black.svg.png',600000,'rb')">Tukar</button></div><div class="cat-item"><div class="r-item-name">80 Robux</div><div class="r-item-cost"><i class="fas fa-coins" style="color:var(--coin)"></i> 1.500.000</div><button class="btn-claim-reward btn-topup-game brutal-click" data-coin="1500000" onclick="openTopupModal('Roblox','80 Robux','https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Roblox_player_icon_black.svg/320px-Roblox_player_icon_black.svg.png',1500000,'rb')">Tukar</button></div></div></div>
+            </div>
+            <div id="shop-sec-topup" style="display:none;">
+                <div class="cat-header" style="color:var(--diamond);font-weight:900;text-transform:uppercase;font-size:16px;margin-bottom:10px;border-bottom:3px solid #000;padding-bottom:5px;display:inline-block;"><i class="fas fa-gem"></i> Diamond</div>
+                <div class="cat-items-grid bouncy"><div class="cat-item"><div class="r-item-name">10 DM</div><div class="r-item-cost"><i class="fas fa-coins" style="color:var(--coin)"></i> 5K</div><button class="btn-claim-reward btn-buy-dm brutal-click-sm" data-cost="5000" onclick="buyDiamondWithCoin(5000,10)">Beli</button></div><div class="cat-item"><div class="r-item-name">25 DM</div><div class="r-item-cost"><i class="fas fa-coins" style="color:var(--coin)"></i> 12K</div><button class="btn-claim-reward btn-buy-dm brutal-click-sm" data-cost="12000" onclick="buyDiamondWithCoin(12000,25)">Beli</button></div><div class="cat-item"><div class="r-item-name">50 DM</div><div class="r-item-cost"><i class="fas fa-coins" style="color:var(--coin)"></i> 23K</div><button class="btn-claim-reward btn-buy-dm brutal-click-sm" data-cost="23000" onclick="buyDiamondWithCoin(23000,50)">Beli</button></div><div class="cat-item"><div class="r-item-name">100 DM</div><div class="r-item-cost"><i class="fas fa-coins" style="color:var(--coin)"></i> 45K</div><button class="btn-claim-reward btn-buy-dm brutal-click-sm" data-cost="45000" onclick="buyDiamondWithCoin(45000,100)">Beli</button></div></div>
+                <div class="cat-header" style="color:var(--tips);font-weight:900;text-transform:uppercase;font-size:16px;margin-bottom:10px;margin-top:15px;border-bottom:3px solid #000;padding-bottom:5px;display:inline-block;"><i class="fas fa-lightbulb"></i> Lampu Bantuan (Tips)</div>
+                <div class="cat-items-grid bouncy" style="animation-delay:0.1s;"><div class="cat-item"><div class="r-item-name">1 Tip</div><div class="r-item-cost"><i class="fas fa-gem" style="color:var(--diamond)"></i> 15</div><button class="btn-claim-reward btn-buy-tips-pkg brutal-click-sm" data-cost="15" onclick="buyTipsPackage(15,1,true)">Beli</button></div><div class="cat-item"><div class="r-item-name">3 Tips</div><div class="r-item-cost"><i class="fas fa-gem" style="color:var(--diamond)"></i> 40</div><button class="btn-claim-reward btn-buy-tips-pkg brutal-click-sm" data-cost="40" onclick="buyTipsPackage(40,3,true)">Beli</button></div><div class="cat-item"><div class="r-item-name">15 Tips</div><div class="r-item-cost"><i class="fas fa-gem" style="color:var(--diamond)"></i> 180</div><button class="btn-claim-reward btn-buy-tips-pkg brutal-click-sm" data-cost="180" onclick="buyTipsPackage(180,15,true)">Beli</button></div><div class="cat-item"><div class="r-item-name">30 Tips</div><div class="r-item-cost"><i class="fas fa-gem" style="color:var(--diamond)"></i> 300</div><button class="btn-claim-reward btn-buy-tips-pkg brutal-click-sm" data-cost="300" onclick="buyTipsPackage(300,30,true)">Beli</button></div></div>
+            </div>
+            <div id="shop-sec-spin" style="display:none;">
+                <div class="gacha-container bouncy"><div style="font-weight:900;font-size:20px;text-transform:uppercase;text-align:center;color:#000;border-bottom:4px solid #000;padding-bottom:10px;width:100%;">Gacha Box</div><div style="font-weight:700;font-size:13px;color:var(--text-muted);text-align:center;margin-top:-8px;">99% Zonk! Berani Coba?</div><div class="spin-display-area" id="spin-display-area"><div class="spin-grid-1" id="spin-initial"><i class="fas fa-question-circle" style="font-size:60px;color:#CBD5E1;text-shadow:4px 4px 0 #000;"></i></div></div><div class="gacha-controls"><button class="btn-spin btn-spin-1 brutal-click btn-spin-logic" data-cost="1000" onclick="confirmSpinGacha(1,'coin')">Spin 1x<br><span style="font-size:11px;"><i class="fas fa-coins" style="color:var(--coin)"></i> 1.000</span></button><button class="btn-spin btn-spin-10 brutal-click btn-spin-logic" data-cost="50" onclick="confirmSpinGacha(10,'diamond')">Spin 10x<br><span style="font-size:11px;"><i class="fas fa-gem" style="color:var(--diamond)"></i> 50</span></button></div></div>
+            </div>
+        </div>
+        <div id="tab-history" class="tab-content">
+            <div class="history-filters"><button class="history-filter-btn active" onclick="switchHistoryFilter('all',this)">Semua</button><button class="history-filter-btn" onclick="switchHistoryFilter('penukaran',this)">Penukaran</button><button class="history-filter-btn" onclick="switchHistoryFilter('spin',this)">Spin</button><button class="history-filter-btn" onclick="switchHistoryFilter('misi',this)">Misi</button><button class="history-filter-btn" onclick="switchHistoryFilter('harian',this)">Harian</button></div>
+            <div class="history-list" id="history-container"></div>
+        </div>
+        <div class="bottom-nav">
+            <div class="nav-item active" onclick="switchTab('home',this)"><i class="fas fa-book"></i><span>Soal</span></div>
+            <div class="nav-item" onclick="switchTab('halogen',this)"><i class="fas fa-calendar-check"></i><span>Harian</span><div class="nav-badge" id="badge-halogen"></div></div>
+            <div class="nav-item" onclick="switchTab('misi',this)"><i class="fas fa-tasks"></i><span>Misi</span><div class="nav-badge" id="badge-misi"></div></div>
+            <div class="nav-item" onclick="switchTab('rank',this)"><i class="fas fa-shield-alt"></i><span>Rank</span></div>
+            <div class="nav-item" onclick="switchTab('reward',this)"><i class="fas fa-store"></i><span>Toko</span><div class="nav-badge" id="badge-toko"></div></div>
+            <div class="nav-item" onclick="switchTab('history',this)"><i class="fas fa-history"></i><span>Riwayat</span></div>
+        </div>
+        <div id="game-screen">
+            <div class="game-top"><i class="fas fa-arrow-left back-btn brutal-click-sm" onclick="showUnifiedModal('exit')"></i><div class="game-title-text" id="game-title-text">Matematika Dasar</div><div class="tools-row" style="width:auto;"><div class="t-btn tips-btn brutal-click-sm" onclick="handleTipClick()"><i class="fas fa-lightbulb"></i><div class="tips-bubble">Bantuan</div></div><div class="t-btn brutal-click-sm" onclick="toggleCalc()"><i class="fas fa-calculator"></i></div><div class="t-btn brutal-click-sm" id="btn-toggle-draw" onclick="toggleDrawing()"><i class="fas fa-pencil"></i></div></div></div>
+            <div class="game-content" id="game-content-anim">
+                <div id="loading-overlay"><div class="spinner"></div><div style="font-weight:900;color:#000;font-size:20px;text-transform:uppercase;">Memuat Soal...</div></div>
+                <div id="q-core-area"><div class="q-head-row"><div id="q-header" class="q-prompt">Hitunglah</div><div id="q-counter" class="q-counter-pill">1/10</div></div><div id="q-visual" class="visual-area" style="display:none;"></div><div id="q-display" class="eq-display"></div><div class="controls-area"><div id="input-area"></div><div class="prog-track"><div class="prog-fill" id="progress-bar"></div></div><button class="periksa-btn brutal-click" id="btn-check" onclick="checkAnswer()" disabled>PERIKSA</button></div></div>
+            </div>
+        </div>
+        <div id="unified-modal-overlay" class="modal-overlay" onclick="closeUnifiedModal(event)"><div class="unified-modal slide-up" id="unified-modal-box" onclick="event.stopPropagation()"><div class="um-close brutal-click-sm" onclick="closeUnifiedModal(true)"><i class="fas fa-times"></i></div><div class="um-header" id="um-header"></div><div id="um-body"></div><div class="um-btn-group" id="um-footer"></div></div></div>
+        <div id="fs-rank-modal" class="fs-modal"><div class="rank-container"><div class="rank-name" id="rnk-name">Warrior</div><i class="fas fa-shield-alt rank-icon" id="rnk-icon"></i><div style="width:100%;max-width:320px;margin-top:20px;"><div style="display:flex;justify-content:space-between;margin-bottom:10px;font-weight:900;text-transform:uppercase;border-bottom:3px solid #000;padding-bottom:5px;"><span class="rank-progress-text">Point Rank</span><span class="rank-progress-text" id="rnk-max">Max</span></div><div style="text-align:left;font-weight:900;font-size:13px;color:var(--text-muted);margin-bottom:4px;">Poin saat ini:</div><div class="rank-bar-bg"><div class="rank-bar-fill" id="rnk-bar"></div></div><div class="rank-pts" id="rnk-pts" style="display:inline-block;position:relative;top:-8px;">0 Poin</div></div><button class="periksa-btn ready brutal-click" style="background:var(--primary);color:#000;margin-top:auto;" onclick="showClaimSession()">SELANJUTNYA</button></div></div>
+        <div id="fs-claim-modal" class="fs-modal"><div style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;height:100%;padding:5%;background:var(--bg-color);"><i class="fas fa-gift" style="font-size:80px;color:var(--primary);margin-bottom:20px;animation:bounceIn 1s infinite;text-shadow:6px 6px 0 #000;"></i><div style="font-size:28px;font-weight:900;color:#000;margin-bottom:30px;text-transform:uppercase;text-shadow:2px 2px 0 #FFF;">Kerja Bagus!</div><div class="claim-box bouncy" id="claim-reward-box"><div style="font-weight:900;color:#000;text-transform:uppercase;border-bottom:3px solid #000;padding-bottom:5px;width:100%;">Koin Didapat</div><div class="claim-val"><i class="fas fa-coins"></i> +<span id="session-coins-added">0</span></div></div><div style="color:#000;font-weight:900;margin-bottom:40px;font-size:18px;background:#FFF;padding:10px 20px;border:3px solid #000;border-radius:8px;box-shadow:4px 4px 0 #000;" id="session-pts-container">Rank Poin: <span id="session-pts-added" style="color:var(--danger);">0</span> Pts</div><div id="retry-container" style="display:none;"><button class="retry-btn brutal-click" onclick="retrySession()"><i class="fas fa-redo"></i> Coba Lagi</button></div><button class="periksa-btn ready brutal-click" style="background:var(--cyan);color:#000;width:100%;margin-top:auto;" onclick="endSessionAndHome()">KEMBALI KE BERANDA</button></div></div>
+        <div id="calc-modal"><div class="calc-body bouncy"><div class="calc-header"><span><i class="fas fa-calculator"></i> Kalkulator</span><div class="calc-close-btn brutal-click-sm" onclick="toggleCalc()"><i class="fas fa-times" style="font-size:16px;color:#FFF;"></i></div></div><div class="calc-screen" id="calc-screen">0</div><div class="c-grid"><button class="c-btn c-pro brutal-click-sm" onclick="cIn('Math.sin(')">sin</button><button class="c-btn c-pro brutal-click-sm" onclick="cIn('Math.cos(')">cos</button><button class="c-btn c-pro brutal-click-sm" onclick="cIn('Math.tan(')">tan</button><button class="c-btn c-pro brutal-click-sm" onclick="cIn('Math.sqrt(')">√</button><button class="c-btn c-pro brutal-click-sm" onclick="cIn('(')">(</button><button class="c-btn c-pro brutal-click-sm" onclick="cIn(')')">)</button><button class="c-btn c-pro brutal-click-sm" onclick="cIn('**')">^</button><button class="c-btn c-clear brutal-click-sm" onclick="cClear()">C</button><button class="c-btn brutal-click-sm" onclick="cIn('7')">7</button><button class="c-btn brutal-click-sm" onclick="cIn('8')">8</button><button class="c-btn brutal-click-sm" onclick="cIn('9')">9</button><button class="c-btn c-op brutal-click-sm" onclick="cIn('/')">÷</button><button class="c-btn brutal-click-sm" onclick="cIn('4')">4</button><button class="c-btn brutal-click-sm" onclick="cIn('5')">5</button><button class="c-btn brutal-click-sm" onclick="cIn('6')">6</button><button class="c-btn c-op brutal-click-sm" onclick="cIn('*')">×</button><button class="c-btn brutal-click-sm" onclick="cIn('1')">1</button><button class="c-btn brutal-click-sm" onclick="cIn('2')">2</button><button class="c-btn brutal-click-sm" onclick="cIn('3')">3</button><button class="c-btn c-op brutal-click-sm" onclick="cIn('-')">-</button><button class="c-btn brutal-click-sm" onclick="cIn('.')">.</button><button class="c-btn brutal-click-sm" onclick="cIn('0')">0</button><button class="c-btn brutal-click-sm" style="background:var(--secondary);" onclick="cEval()">=</button><button class="c-btn c-op brutal-click-sm" onclick="cIn('+')">+</button></div></div></div>
+        <div id="canvas-container"><div class="canvas-close brutal-click-sm" onclick="toggleDrawing()"><i class="fas fa-times"></i></div><canvas id="scratchpad"></canvas><div class="drawing-tools" id="toolbar"><button class="d-btn active brutal-click-sm" id="tool-draw" onclick="setDrawMode('draw')"><i class="fas fa-pencil-alt"></i></button><button class="d-btn brutal-click-sm" id="tool-erase" onclick="setDrawMode('erase')"><i class="fas fa-eraser"></i></button><button class="d-btn brutal-click-sm" id="tool-move" onclick="setDrawMode('move')"><i class="fas fa-hand-pointer"></i></button><button class="d-btn brutal-click-sm" style="color:var(--danger)" onclick="clearCanvas()"><i class="fas fa-trash"></i></button></div></div>
+    </div>
+    <script>
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const audioCtx = new AudioContext();
+
+        function playTone(freq, type, duration, vol = 0.1) { if (audioCtx.state === 'suspended') audioCtx.resume(); const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime); gain.gain.setValueAtTime(vol, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + duration); }
+
+        function playClick() { playTone(600, 'square', 0.1, 0.05); }
+
+        function playSuccess() { playTone(523.25, 'square', 0.15, 0.1); setTimeout(() => playTone(659.25, 'square', 0.2, 0.1), 100); }
+
+        function playError() { playTone(150, 'sawtooth', 0.3, 0.1); }
+
+        function playClaim() { playTone(440, 'square', 0.1, 0.1); setTimeout(() => playTone(554, 'square', 0.1, 0.1), 100); setTimeout(() => playTone(659, 'square', 0.2, 0.1), 200); }
+
+        function playTips() { playTone(880, 'square', 0.1, 0.05); setTimeout(() => playTone(1108, 'square', 0.2, 0.05), 100); }
+        const STORAGE_KEY = 'Math Quiz by raan data';
+        let saveTimeout;
+        let gameState = { diamonds: 0, coins: 0, rankPoints: 0, proTips: 0, modeProgress: { 'Matematika Dasar': 0, 'Aljabar Dasar': 0, 'Logika Pecahan': 0, 'Pola Bilangan': 0, 'Tebak Logika': 0 }, loginStreak: 1, lastLoginDate: null, lastPlayedDate: null, history: [], missionProgress: { m_benar10: 0, m_benar50: 0, m_benar100: 0, m_benar1000_nocalc: 0, m_sesi3: 0, m_sesi5: 0, m_sesi10: 0, m_sesi20: 0, m_calc: 0, m_draw: 0, m_streak3: 0, m_buytip: 0, m_aljabar: 0, m_pecahan: 0, m_spin: 0, m_benar25: 0, m_benar5: 0, m_sesi1: 0, m_topup: 0 }, hiddenMissions: [], missionClaimed: {}, historyFilter: 'all', claimedRankRewards: [] };
+        const missionsConfig = [{ id: 'm_benar5', title: 'Jawab 5 Benar', target: 5, reward: 200, type: 'coin', icon: 'fa-check-circle', color: 'var(--blue)', hideOnComplete: false }, { id: 'm_benar10', title: 'Jawab 10 Benar', target: 10, reward: 500, type: 'coin', icon: 'fa-check-circle', color: 'var(--blue)', hideOnComplete: false }, { id: 'm_benar25', title: 'Jawab 25 Benar', target: 25, reward: 1500, type: 'coin', icon: 'fa-star', color: 'var(--secondary)', hideOnComplete: false }, { id: 'm_benar50', title: 'Pemanasan (50x)', target: 50, reward: 5000, type: 'coin', icon: 'fa-fire', color: 'var(--danger)', hideOnComplete: false }, { id: 'm_benar100', title: 'Pakar Benar (100x)', target: 100, reward: 15000, type: 'coin', icon: 'fa-check-double', color: 'var(--secondary)', hideOnComplete: false }, { id: 'm_benar1000_nocalc', title: '1000 Benar Murni', target: 1000, reward: 150000, type: 'coin', icon: 'fa-brain', color: 'var(--coin)', hideOnComplete: false }, { id: 'm_calc', title: 'Gunakan Kalkulator Pintar', target: 1, reward: 100, type: 'coin', icon: 'fa-calculator', color: 'var(--tips)', hideOnComplete: true }, { id: 'm_draw', title: 'Gunakan Papan Coret', target: 1, reward: 100, type: 'coin', icon: 'fa-pencil-alt', color: 'var(--cyan)', hideOnComplete: true }, { id: 'm_sesi1', title: 'Mainkan 1 Sesi', target: 1, reward: 50, type: 'coin', icon: 'fa-gamepad', color: 'var(--blue)', hideOnComplete: false }, { id: 'm_sesi3', title: 'Mainkan 3 Sesi', target: 3, reward: 1, type: 'diamond', icon: 'fa-gamepad', color: 'var(--diamond)', hideOnComplete: false }, { id: 'm_sesi5', title: 'Mainkan 5 Sesi', target: 5, reward: 2, type: 'diamond', icon: 'fa-gamepad', color: 'var(--diamond)', hideOnComplete: false }, { id: 'm_sesi10', title: 'Mainkan 10 Sesi', target: 10, reward: 5, type: 'diamond', icon: 'fa-gamepad', color: 'var(--diamond)', hideOnComplete: false }, { id: 'm_sesi20', title: 'Maraton 20 Sesi', target: 20, reward: 15, type: 'diamond', icon: 'fa-running', color: 'var(--diamond)', hideOnComplete: false }, { id: 'm_streak3', title: 'Login 3 Hari Beruntun', target: 3, reward: 10000, type: 'coin', icon: 'fa-calendar-check', color: 'var(--danger)', hideOnComplete: false }, { id: 'm_buytip', title: 'Beli Paket Tips di Toko', target: 1, reward: 2000, type: 'coin', icon: 'fa-shopping-cart', color: 'var(--tips)', hideOnComplete: false }, { id: 'm_spin', title: 'Coba Gacha 1x', target: 1, reward: 500, type: 'coin', icon: 'fa-dice', color: 'var(--blue)', hideOnComplete: false }, { id: 'm_aljabar', title: 'Selesaikan 1 Sesi Aljabar', target: 1, reward: 5000, type: 'coin', icon: 'fa-superscript', color: 'var(--blue)', hideOnComplete: false }, { id: 'm_pecahan', title: 'Selesaikan 1 Sesi Pecahan', target: 1, reward: 5000, type: 'coin', icon: 'fa-chart-pie', color: 'var(--tips)', hideOnComplete: false }, { id: 'm_topup', title: 'Lakukan 1x Top Up', target: 1, reward: 3000, type: 'coin', icon: 'fa-wallet', color: 'var(--diamond)', hideOnComplete: false }];
+        const rankTiers = [{ name: 'Warrior', min: 0, max: 1000, color: '#A1662F', icon: 'fa-khanda', reward: { coin: 500, diamond: 1 } }, { name: 'Elite', min: 1000, max: 3000, color: '#A0AEC0', icon: 'fa-shield-alt', reward: { coin: 1500, diamond: 2 } }, { name: 'Master', min: 3000, max: 6000, color: '#D69E2E', icon: 'fa-medal', reward: { coin: 3000, diamond: 3 } }, { name: 'Grandmaster', min: 6000, max: 10000, color: '#38BDF8', icon: 'fa-trophy', reward: { coin: 5000, diamond: 5 } }, { name: 'Epic', min: 10000, max: 20000, color: '#4ADE80', icon: 'fa-dragon', reward: { coin: 8000, diamond: 8 } }, { name: 'Legend', min: 20000, max: 35000, color: '#A855F7', icon: 'fa-gem', reward: { coin: 15000, diamond: 12 } }, { name: 'Mythic', min: 35000, max: 60000, color: '#F43F5E', icon: 'fa-crown', reward: { coin: 25000, diamond: 20 } }, { name: 'Mythical Honor', min: 60000, max: 90000, color: '#F43F5E', icon: 'fa-chess-queen', reward: { coin: 40000, diamond: 30 } }, { name: 'Mythical Glory', min: 90000, max: 150000, color: '#F43F5E', icon: 'fa-chess-king', reward: { coin: 60000, diamond: 50 } }, { name: 'Mythical Immortal', min: 150000, max: 9999999, color: '#F43F5E', icon: 'fa-fire-alt', reward: { coin: 100000, diamond: 100 } }];
+        const halogenRewards = [];
+        for (let i = 1; i <= 30; i++) { if (i % 5 === 0) halogenRewards.push({ type: 'protip', val: 5, icon: 'fa-lightbulb', color: 'var(--tips)', text: '+5' }); else if (i % 3 === 0) halogenRewards.push({ type: 'diamond', val: i * 5, icon: 'fa-gem', color: 'var(--diamond)', text: `+${i*5}` }); else halogenRewards.push({ type: 'coin', val: i * 1500, icon: 'fa-coins', color: 'var(--coin)', text: `+${(i*1.5)}K` }); }
+
+        function getRank(score) { for (let i = rankTiers.length - 1; i >= 0; i--) { if (score >= rankTiers[i].min) return rankTiers[i]; } return rankTiers[0]; }
+
+        function getTodayStr() { let d = new Date(); d.setHours(d.getHours() + 7); return d.toISOString().split('T')[0]; }
+
+        function getCurrentSeasonEnd() { let d = new Date(); d.setHours(d.getHours() + 7); let endDate = new Date(d.getFullYear(), d.getMonth() + 1, 1); if (d.getMonth() === 11) endDate = new Date(d.getFullYear() + 1, 0, 1); endDate.setHours(0, 0, 0, 0); return endDate; }
+
+        function updateSeasonCountdown() { const el = document.getElementById('season-timer'); if (!el) return; const now = new Date(); now.setHours(now.getHours() + 7); const end = getCurrentSeasonEnd(); const diff = end - now; if (diff <= 0) { el.innerText = 'Segera!'; return; } const days = Math.floor(diff / (1000 * 60 * 60 * 24)); const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)); const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)); el.innerText = `${days}h ${hours}j ${mins}m`; }
+        async function loadState() {
+            let saved = localStorage.getItem(STORAGE_KEY);
+            if (!saved && 'caches' in window) { try { const cache = await caches.open('math-quiz-cache-v2'); const res = await cache.match('/math-state'); if (res) saved = await res.text(); } catch (e) {} }
+            if (saved) { try { let parsed = JSON.parse(saved); gameState = { ...gameState, ...parsed }; if (!gameState.modeProgress) gameState.modeProgress = { 'Matematika Dasar': 0, 'Aljabar Dasar': 0, 'Logika Pecahan': 0, 'Pola Bilangan': 0, 'Tebak Logika': 0 };['Matematika Dasar', 'Aljabar Dasar', 'Logika Pecahan', 'Pola Bilangan', 'Tebak Logika'].forEach(k => { if (typeof gameState.modeProgress[k] !== 'number') gameState.modeProgress[k] = 0; }); if (!gameState.missionClaimed) gameState.missionClaimed = {}; if (!gameState.historyFilter) gameState.historyFilter = 'all'; if (!gameState.claimedRankRewards) gameState.claimedRankRewards = []; if (!gameState.hiddenMissions) gameState.hiddenMissions = []; } catch (e) {} }
+            if (gameState.history.length === 0) { gameState.diamonds = 0;
+                gameState.coins = 0;
+                gameState.rankPoints = 0;
+                gameState.history.push({ id: Date.now(), type: 'login', game: 'Sistem Reward', item: 'Welcome Gift', date: getTodayStr(), status: 'success', dCost: 0, sCost: 0, inputs: { Catatan: 'Bonus Pemain Baru' } });
+                saveStateSync(); }
+            checkDailyStatus();
+            updateUIStats();
+            renderHalogen();
+            renderMissions();
+            renderRankTab();
+            renderHistory();
+            updateSeasonCountdown();
+        }
+
+        function saveState() { clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(saveStateSync, 500); }
+        async function saveStateSync() { const dataStr = JSON.stringify(gameState);
+            localStorage.setItem(STORAGE_KEY, dataStr); if ('caches' in window) { try { const cache = await caches.open('math-quiz-cache-v2'); await cache.put('/math-state', new Response(dataStr)); } catch (e) {} } }
+
+        function checkDailyStatus() {
+            let today = getTodayStr(); if (gameState.lastLoginDate) { let diffDays = Math.ceil(Math.abs(new Date(today) - new Date(gameState.lastLoginDate)) / (1000 * 60 * 60 * 24)); if (new Date(today) > new Date(gameState.lastLoginDate) && diffDays > 1) { gameState.loginStreak = 1; } } else { gameState.loginStreak = 1; }
+            if (gameState.lastPlayedDate && gameState.lastPlayedDate !== today) { for (let key in gameState.missionProgress) gameState.missionProgress[key] = 0;
+                gameState.missionClaimed = {};
+                gameState.hiddenMissions = [];
+                gameState.missionProgress['m_streak3'] = Math.min(3, gameState.loginStreak); }
+            let lastPlayed = gameState.lastPlayedDate || gameState.lastLoginDate; if (lastPlayed) { let pDiff = Math.ceil(Math.abs(new Date(today) - new Date(lastPlayed)) / (1000 * 60 * 60 * 24));
+                gameState.history.forEach(h => { if (h.status === 'pending') { let daysSinceTopup = Math.ceil(Math.abs(new Date(today) - new Date(h.date)) / (1000 * 60 * 60 * 24)); if (pDiff > 1) { h.status = 'failed';
+                            h.game = h.game + ' (Batal)'; } else if (daysSinceTopup >= 7) { h.status = 'success'; } } }); }
+            saveStateSync(); }
+
+        function updateBadges() {
+            let today = getTodayStr(); let isClaimedToday = (gameState.lastLoginDate === today);
+            document.getElementById('badge-halogen').style.display = !isClaimedToday ? 'block' : 'none'; let hasMisi = missionsConfig.some(m => !gameState.hiddenMissions.includes(m.id) && (gameState.missionProgress[m.id] || 0) >= m.target && !gameState.missionClaimed[m.id]);
+            document.getElementById('badge-misi').style.display = hasMisi ? 'block' : 'none';
+            document.getElementById('badge-toko').style.display = (gameState.coins >= 5000) ? 'block' : 'none'; }
+
+        function updateUIStats() {
+            document.querySelectorAll('.global-diamond').forEach(el => el.innerText = gameState.diamonds.toLocaleString('id-ID'));
+            document.querySelectorAll('.global-coin').forEach(el => el.innerText = gameState.coins.toLocaleString('id-ID')); let elPro = document.getElementById('global-protips'); if (elPro) elPro.innerText = gameState.proTips; let mtkQ = gameState.modeProgress['Matematika Dasar'] || 0; let aljQ = gameState.modeProgress['Aljabar Dasar'] || 0; let pchQ = gameState.modeProgress['Logika Pecahan'] || 0;
+            document.getElementById('home-circle-mtk').style.setProperty('--progress', (mtkQ % 100) + '%');
+            document.getElementById('home-level-mtk').innerText = Math.floor(mtkQ / 100) + 1;
+            document.getElementById('home-circle-alj').style.setProperty('--progress', (aljQ % 100) + '%');
+            document.getElementById('home-level-alj').innerText = Math.floor(aljQ / 100) + 1;
+            document.getElementById('home-circle-pch').style.setProperty('--progress', (pchQ % 100) + '%');
+            document.getElementById('home-level-pch').innerText = Math.floor(pchQ / 100) + 1;
+            updateRewardButtons();
+            renderMissions();
+            updateBadges();
+            updateSeasonCountdown(); }
+
+        function isGameActive() { const gs = document.getElementById('game-screen'); return gs && gs.style.display === 'flex'; }
+
+        function normalizeFractionText(raw) { if (raw === null || raw === undefined) return ''; return String(raw).replace(/\s+/g, '').replace(/,/g, '.'); }
+
+        function parseFractionValue(raw) { const s = normalizeFractionText(raw); if (!s) return null; if (s.includes('/')) { const [n, d] = s.split('/'); const num = Number(n); const den = Number(d); if (!Number.isFinite(num) || !Number.isFinite(den) || den === 0) return null; return { n: num, d: den }; } const num = Number(s); if (!Number.isFinite(num)) return null; return { n: num, d: 1 }; }
+
+        function gcd(a, b) { a = Math.abs(a);
+            b = Math.abs(b); while (b) { [a, b] = [b, a % b]; } return a || 1; }
+
+        function simplifyFraction(n, d) { if (d < 0) { n *= -1;
+                d *= -1; } const g = gcd(n, d); return { n: n / g, d: d / g }; }
+
+        function fractionToString(fr) { if (!fr) return ''; const s = simplifyFraction(fr.n, fr.d); if (s.d === 1) return String(s.n); return `${s.n}/${s.d}`; }
+
+        function compareAnswers(userVal, correctVal) { const u = parseFractionValue(userVal); const c = parseFractionValue(correctVal); if (!u || !c) return String(userVal).trim() === String(correctVal).trim(); return (u.n * c.d) === (c.n * u.d); }
+
+        function setTipButtonVisual(active) { const btn = document.querySelector('.tips-btn'); if (!btn) return;
+            btn.classList.toggle('active-tip', !!active); }
+        window.handleTipClick = function() {
+            if (isGameActive()) { if (isChecked) return; if (isTipActiveForCurrentQuestion) { showAlert('info', 'Tip Sudah Dipakai', 'Tip hanya bisa dipakai 1x per soal.'); return; } if (gameState.proTips <= 0) { showAlert('info', 'Tip Habis', 'Gunakan Diamond untuk membeli tips di Toko Bantuan.');
+                    switchTab('reward', document.querySelectorAll('.nav-item')[4]);
+                    switchShopTab('topup'); return; }
+                pendingAction = () => applyProTipDirect();
+                showUnifiedModal('confirm_tip', { tipsLeft: gameState.proTips }); } else { switchTab('reward', document.querySelectorAll('.nav-item')[4]);
+                switchShopTab('topup');
+                showAlert('info', 'Toko Bantuan', 'Di luar game, tombol tip membuka toko bantuan.'); } };
+        window.applyProTipDirect = function() { playTips();
+            closeUnifiedModal(true);
+            gameState.proTips -= 1;
+            saveState();
+            updateUIStats();
+            isTipActiveForCurrentQuestion = true;
+            applyTipsVisuals(); }; let cExp = '',
+            usedCalculator = false;
+        window.toggleCalc = function() { playClick();
+            usedCalculator = true;
+            gameState.missionProgress['m_calc'] = 1;
+            saveState(); const mod = document.getElementById('calc-modal');
+            mod.style.display = mod.style.display === 'flex' ? 'none' : 'flex'; };
+        window.cIn = function(val) { playClick(); if (cExp === 'Error') cExp = '';
+            cExp += val;
+            updateCScreen(); };
+        window.cClear = function() { playClick();
+            cExp = '';
+            updateCScreen(); };
+        window.cEval = function() { playClick(); try { let res = eval(cExp); if (res % 1 !== 0) res = res.toFixed(4);
+                cExp = String(res); } catch (e) { cExp = 'Error'; }
+            updateCScreen(); };
+
+        function updateCScreen() { document.getElementById('calc-screen').innerText = cExp.replace(/Math.sqrt\(/g, '√(').replace(/\*\*/g, '^').replace(/\*/g, '×').replace(/\//g, '÷') || '0'; }
+        const canvas = document.getElementById('scratchpad'); const ctx = canvas.getContext('2d'); let isDrawing = false,
+            drawMode = 'draw',
+            isCanvasActive = false; const toolbar = document.getElementById('toolbar');['touchstart', 'touchmove', 'mousedown', 'mousemove'].forEach(evt => { toolbar.addEventListener(evt, (e) => e.stopPropagation(), { passive: false }); });
+        document.querySelector('.canvas-close').addEventListener('touchstart', (e) => e.stopPropagation());
+        document.querySelector('.canvas-close').addEventListener('mousedown', (e) => e.stopPropagation());
+
+        function resizeCanvas() { canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight; }
+        window.addEventListener('resize', resizeCanvas);
+
+        function startDraw(e) { if (drawMode === 'move') return;
+            isDrawing = true;
+            draw(e); }
+
+        function stopDraw() { isDrawing = false;
+            ctx.beginPath(); }
+
+        function draw(e) { if (!isDrawing || drawMode === 'move') return; const rect = canvas.getBoundingClientRect(); const cx = e.touches ? e.touches[0].clientX : e.clientX; const cy = e.touches ? e.touches[0].clientY : e.clientY; const x = cx - rect.left,
+                y = cy - rect.top;
+            ctx.lineWidth = drawMode === 'erase' ? 20 : 3;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = drawMode === 'erase' ? 'rgba(255,255,255,1)' : '#000';
+            ctx.globalCompositeOperation = drawMode === 'erase' ? 'destination-out' : 'source-over';
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x, y); }
+        canvas.addEventListener('mousedown', startDraw);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDraw);
+        canvas.addEventListener('mouseout', stopDraw);
+        canvas.addEventListener('touchstart', startDraw, { passive: false });
+        canvas.addEventListener('touchmove', draw, { passive: false });
+        canvas.addEventListener('touchend', stopDraw);
+        window.toggleDrawing = function() { playClick();
+            isCanvasActive = !isCanvasActive;
+            gameState.missionProgress['m_draw'] = 1;
+            saveState(); const c = document.getElementById('canvas-container'),
+                btn = document.getElementById('btn-toggle-draw'); if (isCanvasActive) { c.style.display = 'block';
+                resizeCanvas();
+                btn.classList.add('active');
+                setDrawMode('draw'); } else { c.style.display = 'none';
+                btn.classList.remove('active'); } };
+        window.setDrawMode = function(mode) { playClick();
+            drawMode = mode;['draw', 'erase', 'move'].forEach(m => document.getElementById('tool-' + m).classList.remove('active'));
+            document.getElementById('tool-' + mode).classList.add('active');
+            canvas.style.pointerEvents = (mode === 'move') ? 'none' : 'auto'; };
+        window.clearCanvas = function() { playClick();
+            ctx.clearRect(0, 0, canvas.width, canvas.height); };
+        let pendingTopupData = null;
+
+        function showAlert(type, title, desc) { let icon, color; if (type === 'success') { icon = 'fa-check-circle';
+                color = 'var(--secondary)'; } else if (type === 'error') { icon = 'fa-times-circle';
+                color = 'var(--danger)'; } else { icon = 'fa-info-circle';
+                color = 'var(--blue)'; }
+            showUnifiedModal('custom_alert', { title, desc, icon, color }); }
+
+        function showUnifiedModal(type, data = null) { playClick(); const overlay = document.getElementById('unified-modal-overlay'); const header = document.getElementById('um-header'); const body = document.getElementById('um-body'); const footer = document.getElementById('um-footer');
+            overlay.style.display = 'flex'; let box = document.getElementById('unified-modal-box');
+            box.classList.remove('slide-up');
+            void box.offsetWidth;
+            box.classList.add('slide-up'); if (type === 'custom_alert') { header.innerHTML = `<i class="fas ${data.icon} um-icon" style="color:${data.color}"></i><div class="um-title">${data.title}</div><div class="um-desc">${data.desc}</div>`;
+                body.innerHTML = '';
+                footer.innerHTML = `<button class="um-btn um-btn-secondary brutal-click-sm" onclick="closeUnifiedModal()">Tutup</button>`; } else if (type === 'confirm_action') { header.innerHTML = `<i class="fas ${data.icon||'fa-circle-question'} um-icon" style="color:${data.color||'var(--blue)'}"></i><div class="um-title">${data.title}</div><div class="um-desc">${data.desc}</div>`;
+                body.innerHTML = '';
+                footer.innerHTML = `<button class="um-btn um-btn-secondary brutal-click-sm" onclick="closeUnifiedModal()">Batal</button><button class="um-btn um-btn-primary brutal-click-sm" onclick="showPendingAction()">${data.confirmText||'LANJUTKAN'}</button>`; } else if (type === 'confirm_tip') { header.innerHTML = `<i class="fas fa-lightbulb um-icon" style="color:var(--tips)"></i><div class="um-title">Gunakan Bantuan?</div><div class="um-desc">Apakah kamu ingin menggunakan bantuan? Bantuan akan diberikan jawabannya.<br><span style="color:#000;font-weight:900;">Tips tersisa: ${data.tipsLeft}</span></div>`;
+                body.innerHTML = '';
+                footer.innerHTML = `<button class="um-btn um-btn-secondary brutal-click-sm" onclick="closeUnifiedModal()">Batal</button><button class="um-btn um-btn-primary brutal-click-sm" style="background:var(--tips);" onclick="showPendingAction()">Ya, Gunakan</button>`; } else if (type === 'start_game') { pendingAction = () => startGame(data.modeName, true);
+                header.innerHTML = `<i class="fas fa-play-circle um-icon" style="color:var(--secondary)"></i><div class="um-title">Mulai Game?</div><div class="um-desc">Mode <b>${data.modeName}</b> akan dibuka sekarang.</div>`;
+                body.innerHTML = '';
+                footer.innerHTML = `<button class="um-btn um-btn-primary brutal-click-sm" style="width:100%" onclick="showPendingAction()">Mulai</button>`; } else if (type === 'rank_reward') { pendingAction = () => claimRankUpReward();
+                header.innerHTML = `<i class="fas fa-gift um-icon" style="color:var(--primary)"></i><div class="um-title">Rank Up Reward</div><div class="um-desc">Kamu naik rank dan mendapatkan hadiah eksklusif.</div>`;
+                body.innerHTML = `<div class="claim-box" style="margin-bottom:0;"><div style="font-weight:900;color:#000;text-transform:uppercase;border-bottom:3px solid #000;padding-bottom:5px;width:100%;">Hadiah</div><div class="claim-val"><i class="fas fa-coins"></i> +${data.coin.toLocaleString('id-ID')}</div><div class="claim-val" style="color:var(--diamond);"><i class="fas fa-gem"></i> +${data.diamond}</div></div>`;
+                footer.innerHTML = `<button class="um-btn um-btn-secondary brutal-click-sm" onclick="closeUnifiedModal()">Nanti</button><button class="um-btn um-btn-primary brutal-click-sm" onclick="showPendingAction()">Klaim</button>`; } else if (type === 'exit') { header.innerHTML = `<i class="fas fa-sign-out-alt um-icon" style="color:var(--danger)"></i><div class="um-title">Keluar Permainan?</div><div class="um-desc">Progres poin pada sesi ini akan dihentikan. Yakin ingin keluar?</div>`;
+                body.innerHTML = '';
+                footer.innerHTML = `<button class="um-btn um-btn-secondary brutal-click-sm" onclick="closeUnifiedModal()">Batal</button><button class="um-btn um-btn-danger brutal-click-sm" onclick="closeUnifiedModal();goHome();">Ya, Keluar</button>`; } else if (type === 'use_tip') { if (isChecked) return closeUnifiedModal(); let isFree = gameState.proTips > 0; if (isFree) { header.innerHTML = `<i class="fas fa-lightbulb um-icon" style="color:var(--tips);"></i><div class="um-title">Gunakan Bantuan</div><div class="um-desc">Kamu memiliki <span style="color:#000;font-weight:900">${gameState.proTips}</span> Tips tersisa. Gunakan sekarang?</div>`;
+                    body.innerHTML = '';
+                    footer.innerHTML = `<button class="um-btn um-btn-secondary brutal-click-sm" onclick="closeUnifiedModal()">Batal</button><button class="um-btn um-btn-primary brutal-click-sm" onclick="applyProTipDirect()">Gunakan Tips</button>`; } else { handleTipClick(); } } else if (type === 'buy_dm') { header.innerHTML = `<i class="fas fa-gem um-icon" style="color:var(--diamond)"></i><div class="um-title">Beli Diamond</div><div class="um-desc">Tukar koin yang kamu dapat dengan Diamond.</div>`;
+                body.innerHTML = `<div class="cat-items-grid" style="margin-bottom:0;gap:10px;"><div class="cat-item" style="padding:15px 5px;"><div class="r-item-name">10 DM</div><div class="r-item-cost"><i class="fas fa-coins" style="color:var(--coin)"></i> 5K</div><button class="btn-claim-reward btn-buy-dm brutal-click-sm" data-cost="5000" onclick="buyDiamondWithCoin(5000,10,true)">Beli</button></div><div class="cat-item" style="padding:15px 5px;"><div class="r-item-name">25 DM</div><div class="r-item-cost"><i class="fas fa-coins" style="color:var(--coin)"></i> 12K</div><button class="btn-claim-reward btn-buy-dm brutal-click-sm" data-cost="12000" onclick="buyDiamondWithCoin(12000,25,true)">Beli</button></div><div class="cat-item" style="padding:15px 5px;"><div class="r-item-name">50 DM</div><div class="r-item-cost"><i class="fas fa-coins" style="color:var(--coin)"></i> 23K</div><button class="btn-claim-reward btn-buy-dm brutal-click-sm" data-cost="23000" onclick="buyDiamondWithCoin(23000,50,true)">Beli</button></div><div class="cat-item" style="padding:15px 5px;"><div class="r-item-name">100 DM</div><div class="r-item-cost"><i class="fas fa-coins" style="color:var(--coin)"></i> 45K</div><button class="btn-claim-reward btn-buy-dm brutal-click-sm" data-cost="45000" onclick="buyDiamondWithCoin(45000,100,true)">Beli</button></div></div>`;
+                footer.innerHTML = `<button class="um-btn um-btn-secondary brutal-click-sm" style="width:100%" onclick="closeUnifiedModal()">Tutup</button>`;
+                updateRewardButtons(); } else if (type === 'topup') { pendingTopupData = data;
+                header.innerHTML = `<img src="${data.img}" style="width:50px;height:50px;border-radius:8px;object-fit:contain;background:#FFF;margin-bottom:10px;border:3px solid #000;box-shadow:4px 4px 0 #000;"><div class="um-title">Top Up ${data.game}</div><div class="um-desc" style="font-weight:900;color:var(--danger)">${data.item}</div>`; let formHTML = ''; if (data.type === 'ff') formHTML = `<div class="form-group"><label class="form-label">User ID Free Fire</label><input type="number" id="tu-inp-1" class="form-input" placeholder="Masukkan ID..."></div>`; else if (data.type === 'ml') formHTML = `<div class="form-group"><label class="form-label">User ID Mobile Legends</label><input type="number" id="tu-inp-1" class="form-input" placeholder="Masukkan ID..."></div><div class="form-group"><label class="form-label">Zone / Server ID</label><input type="number" id="tu-inp-2" class="form-input" placeholder="Server ID..."></div>`; else if (data.type === 'rb') formHTML = `<div class="form-group"><label class="form-label">Username Display Roblox</label><input type="text" id="tu-inp-1" class="form-input" placeholder="Display Name..."></div><div class="form-group"><label class="form-label">Username (Login)</label><input type="text" id="tu-inp-2" class="form-input" placeholder="Username..."></div>`;
+                body.innerHTML = `${formHTML}<div style="text-align:center;margin-top:15px;font-size:14px;font-weight:900;color:#000;">Total Bayar: <span style="color:var(--danger)"><i class="fas fa-coins"></i> ${data.coinCost.toLocaleString('id-ID')}</span> Koin</div>`;
+                footer.innerHTML = `<button class="um-btn um-btn-secondary brutal-click-sm" onclick="closeUnifiedModal()">BATAL</button><button class="um-btn um-btn-primary brutal-click-sm" onclick="submitTopup()">KONFIRMASI</button>`; } else if (type === 'history') { let h = gameState.history.find(x => x.id === data); if (!h) return; let stText = h.status === 'success' ? 'Sukses' : (h.status === 'failed' ? 'Gagal' : 'Sedang Diproses'); let stColor = h.status === 'success' ? 'var(--secondary)' : (h.status === 'failed' ? 'var(--danger)' : 'var(--blue)');
+                header.innerHTML = `<i class="fas fa-receipt um-icon" style="color:#000"></i><div class="um-title">Detail Transaksi</div>`; let html = `<div class="um-data-row"><span class="um-data-label">Tanggal</span><span class="um-data-val">${h.date}</span></div><div class="um-data-row"><span class="um-data-label">Tipe/Game</span><span class="um-data-val">${h.game}</span></div><div class="um-data-row"><span class="um-data-label">Item</span><span class="um-data-val">${h.item}</span></div><div class="um-data-row"><span class="um-data-label">Status</span><span class="um-data-val" style="color:${stColor};font-weight:900;">${stText}</span></div>`; for (let key in h.inputs) { html += `<div class="um-data-row"><span class="um-data-label">${key}</span><span class="um-data-val">${h.inputs[key]}</span></div>`; }
+                body.innerHTML = `<div style="background:#E2E8F0;border-radius:8px;padding:15px;border:2px solid #000;">${html}</div>`;
+                footer.innerHTML = `<button class="um-btn um-btn-secondary brutal-click-sm" style="width:100%" onclick="closeUnifiedModal()">Tutup</button>`; } }
+        window.closeUnifiedModal = function(arg = false) { const overlay = document.getElementById('unified-modal-overlay'); if (arg && arg.target) { if (arg.target.id !== 'unified-modal-overlay') return; }
+            pendingAction = null;
+            pendingTopupData = null;
+            overlay.style.display = 'none'; };
+        window.switchTab = function(tabId, el) { playClick();
+            document.querySelectorAll('.tab-content').forEach(t => { t.classList.remove('active', 'bouncy'); });
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); let targetTab = document.getElementById('tab-' + tabId);
+            targetTab.classList.add('active');
+            targetTab.scrollTop = 0;
+            targetTab.scrollLeft = 0;
+            void targetTab.offsetWidth;
+            targetTab.classList.add('bouncy'); if (el) el.classList.add('active'); let headerText = document.getElementById('top-bar-title'); if (tabId === 'rank') { headerText.innerText = 'Papan Peringkat';
+                document.getElementById('global-stats').style.display = 'none';
+                renderRankTab();
+                updateSeasonCountdown(); } else { document.getElementById('global-stats').style.display = 'flex'; if (tabId === 'history') { headerText.innerText = 'Riwayat';
+                    renderHistory(); } else if (tabId === 'misi') { headerText.innerText = 'Misi Harian';
+                    renderMissions(); } else if (tabId === 'home') { gameState.historyFilter = gameState.historyFilter || 'all'; } else if (tabId === 'reward') { headerText.innerText = 'Toko';
+                    updateRewardButtons(); } else if (tabId === 'halogen') { headerText.innerText = 'Jadwal';
+                    renderHalogen();
+                    updateRewardButtons(); } else { headerText.innerText = 'M A T H'; } } };
+        window.switchShopTab = function(tabId) { playClick();
+            document.getElementById('btn-tab-penukaran').classList.remove('active');
+            document.getElementById('btn-tab-topup').classList.remove('active');
+            document.getElementById('btn-tab-spin').classList.remove('active');
+            document.getElementById('shop-sec-penukaran').style.display = 'none';
+            document.getElementById('shop-sec-topup').style.display = 'none';
+            document.getElementById('shop-sec-spin').style.display = 'none';
+            document.getElementById('btn-tab-' + tabId).classList.add('active');
+            document.getElementById('shop-sec-' + tabId).style.display = 'block'; const rewardTab = document.getElementById('tab-reward'); if (rewardTab) rewardTab.scrollTop = 0;
+            updateRewardButtons(); };
+        let spinAutoClearTimeout = null;
+        window.spinGacha = function(times, currency) { let cost = (times === 1) ? 1000 : 50; if (currency === 'coin' && gameState.coins < cost) { showAlert('info', 'Koin Kurang', 'Koin tidak cukup untuk melakukan Spin.'); return; } if (currency === 'diamond' && gameState.diamonds < cost) { showAlert('info', 'Diamond Kurang', 'Diamond tidak cukup untuk melakukan Spin.'); return; }
+            playClick(); if (currency === 'coin') gameState.coins -= cost; if (currency === 'diamond') gameState.diamonds -= cost;
+            gameState.missionProgress['m_spin']++;
+            saveState();
+            updateUIStats(); if (spinAutoClearTimeout) clearTimeout(spinAutoClearTimeout); let gBox = document.getElementById('spin-display-area'); if (times === 1) { gBox.innerHTML = `<div class="spin-grid-1" id="anim-text">? ? ?</div>`; } else { let html = '<div class="spin-grid-10">'; for (let i = 0; i < 10; i++) html += `<div class="spin-item anim-text-10">? ? ?</div>`;
+                html += '</div>';
+                gBox.innerHTML = html; } let btns = document.querySelectorAll('.btn-spin-logic');
+            btns.forEach(b => b.disabled = true); let animInterval = setInterval(() => { let randomStrings = ['ZONK!', '+1 DM', '+5 Koin', 'Ampas', '+1 Tip', 'Coba Lagi']; if (times === 1) { document.getElementById('anim-text').innerText = randomStrings[randomInt(0, randomStrings.length - 1)]; } else { document.querySelectorAll('.anim-text-10').forEach(el => { el.innerText = randomStrings[randomInt(0, randomStrings.length - 1)]; }); } }, 100);
+            setTimeout(() => { clearInterval(animInterval); let wins = []; let finalItems = []; for (let i = 0; i < times; i++) { let p = Math.random(); if (p < 0.01) { let jp = Math.random(); if (jp < 0.3) { let v = randomInt(5, 10);
+                        gameState.diamonds += v;
+                        wins.push(v + ' DM');
+                        finalItems.push({ t: v + ' DM', c: 'var(--diamond)' }); } else if (jp < 0.6) { let v = randomInt(1, 3);
+                        gameState.proTips += v;
+                        wins.push(v + ' Tip');
+                        finalItems.push({ t: v + ' Tip', c: 'var(--tips)' }); } else { let v = randomInt(5000, 10000);
+                        gameState.coins += v;
+                        wins.push(v + ' Koin');
+                        finalItems.push({ t: v + ' Koin', c: 'var(--coin)' }); } } else { let zP = Math.random(); if (zP < 0.2) { gameState.coins += 10;
+                        wins.push('10 Koin');
+                        finalItems.push({ t: '10 Koin', c: 'var(--coin)' }); } else if (zP < 0.3) { gameState.rankPoints += 5;
+                        wins.push('5 Pts');
+                        finalItems.push({ t: '5 Pts', c: 'var(--blue)' }); } else { finalItems.push({ t: 'ZONK', c: 'var(--danger)' }); } } } if (times === 1) { gBox.innerHTML = `<div class="spin-grid-1" style="color:${finalItems[0].c}">${finalItems[0].t}</div>`; } else { let html = '<div class="spin-grid-10">';
+                    finalItems.forEach(it => { html += `<div class="spin-item" style="color:${it.c}">${it.t}</div>`; });
+                    html += '</div>';
+                    gBox.innerHTML = html; }
+                saveState();
+                updateUIStats();
+                btns.forEach(b => b.disabled = false); if (wins.length > 0) { showAlert('success', 'Selamat!', `Kamu mendapatkan: ${wins.join(', ')}`);
+                    gameState.history.unshift({ id: Date.now(), type: 'topup', game: 'Gacha Box', item: 'Jackpot!', date: getTodayStr(), status: 'success', dCost: (currency === 'diamond' ? cost : 0), sCost: (currency === 'coin' ? cost : 0), inputs: { Hadiah: wins.join(', ') } }); } else { showAlert('error', 'Kurang Beruntung', 'Kamu mendapat Zonk. Jangan menyerah!'); }
+                renderHistory();
+                spinAutoClearTimeout = setTimeout(() => { document.getElementById('spin-display-area').innerHTML = `<div class="spin-grid-1" id="spin-initial"><i class="fas fa-question-circle" style="font-size:60px;color:#CBD5E1;text-shadow:4px 4px 0 #000;"></i></div>`; }, 5000); }, 1500); };
+        let isClaimingLogin = false;
+
+        function renderHalogen() { let today = getTodayStr(); let isClaimedToday = (gameState.lastLoginDate === today); let currentDayIdx = isClaimedToday ? Math.max(0, gameState.loginStreak - 2) : Math.max(0, gameState.loginStreak - 1);
+            document.getElementById('streak-counter').innerText = gameState.loginStreak; let sBox = document.getElementById('streak-box'); if (gameState.loginStreak > 1) sBox.classList.add('on-fire'); else sBox.classList.remove('on-fire'); let btn = document.getElementById('btn-login-claim'); if (isClaimedToday) { btn.className = 'btn-claim-halogen disabled';
+                btn.innerText = 'SUDAH KLAIM'; } else { btn.className = 'btn-claim-halogen active brutal-click';
+                btn.innerHTML = 'KLAIM <i class="fas fa-check"></i>'; } let html = ''; for (let i = 0; i < 30; i++) { let r = halogenRewards[i]; let boxClass = 'day-box'; if (i < currentDayIdx || (i === currentDayIdx && isClaimedToday)) boxClass += ' claimed'; else if (i === currentDayIdx && !isClaimedToday) boxClass += ' current';
+            html += `<div class="${boxClass}"><div class="check-mark"><i class="fas fa-check"></i></div><div class="day-num">Hari ${i+1}</div><i class="fas ${r.icon} day-icon" style="color:${r.color}"></i><div class="day-val" style="color:${r.color}">${r.text}</div></div>`; }
+            document.getElementById('halogen-grid').innerHTML = html; }
+        window.claimLoginReward = function() { if (gameState.lastLoginDate === getTodayStr() || isClaimingLogin) return;
+            isClaimingLogin = true;
+            playClaim(); let dayIdx = gameState.loginStreak - 1; let r = halogenRewards[dayIdx]; if (r.type === 'diamond') gameState.diamonds += r.val; else if (r.type === 'coin') gameState.coins += r.val; else if (r.type === 'protip') gameState.proTips += r.val;
+            gameState.history.unshift({ id: Date.now(), type: 'login', category: 'harian', game: 'Login Harian', item: `+ ${r.text}`, date: getTodayStr(), status: 'success', dCost: 0, sCost: 0, inputs: { Streak: `Hari ke-${gameState.loginStreak}` } });
+            gameState.lastLoginDate = getTodayStr(); if (gameState.loginStreak < 30) gameState.loginStreak++; else gameState.loginStreak = 1;
+            gameState.missionProgress['m_streak3'] = Math.min(3, gameState.loginStreak);
+            saveState();
+            updateUIStats();
+            renderHalogen();
+            renderHistory();
+            setTimeout(() => { showAlert('success', 'Berhasil', 'Mendapat hadiah kehadiran Harian!');
+                isClaimingLogin = false; }, 300); };
+
+        function renderMissions() { const visibleMissions = missionsConfig.filter(m => !(m.hideOnComplete && gameState.hiddenMissions.includes(m.id))).map(m => { const progress = gameState.missionProgress[m.id] || 0; const completed = progress >= m.target; const claimed = !!gameState.missionClaimed[m.id]; const ready = completed && !claimed; return { ...m, progress, completed, claimed, ready }; }).sort((a, b) => { const order = (m) => m.claimed ? 0 : (m.ready ? 1 : 2); return order(a) - order(b) || a.title.localeCompare(b.title, 'id'); }); let html = '';
+            visibleMissions.forEach(m => { const pct = Math.min(100, (m.progress / m.target) * 100); const btnClass = m.claimed ? 'm-btn' : (m.ready ? 'm-btn ready brutal-click' : 'm-btn'); const btnText = m.claimed ? 'TERKLAIM' : (m.ready ? 'KLAIM' : `${m.progress}/${m.target}`); const rewardIcon = m.type === 'coin' ? 'fa-coins' : 'fa-gem'; const cardClass = m.claimed ? 'm-card claimed-mission' : (m.ready ? 'm-card ready-mission completed-mission' : 'm-card');
+            html += `<div class="${cardClass}"><div class="m-icon-box" style="color:${m.color}"><i class="fas ${m.icon}"></i></div><div class="m-info"><div class="m-title">${m.title}</div><div class="m-prog-bg"><div class="m-prog-fill" style="width:${pct}%"></div></div><div class="m-reward"><i class="fas ${rewardIcon}"></i> ${m.reward.toLocaleString('id-ID')} ${m.type==='coin'?'Koin':'DM'}</div></div><button class="${btnClass}" onclick="claimMission('${m.id}')" ${(!m.ready||m.claimed)?'disabled':''}>${btnText}</button></div>`; }); if (html === '') html = '<div style="text-align:center;color:var(--text-muted);font-weight:900;margin-top:20px;">Semua misi harian telah diselesaikan!</div>';
+            document.getElementById('mission-container').innerHTML = html; }
+        window.claimMission = function(id) { let m = missionsConfig.find(x => x.id === id); if (!m || gameState.missionProgress[id] < m.target) return;
+            playClaim(); if (m.type === 'coin') gameState.coins += m.reward; else if (m.type === 'diamond') gameState.diamonds += m.reward;
+            gameState.missionClaimed[id] = true; if (m.hideOnComplete) gameState.hiddenMissions.push(m.id);
+            gameState.history.unshift({ id: Date.now(), type: 'mission', category: 'misi', game: 'Hadiah Misi', item: `+ ${m.reward} ${m.type==='coin'?'Koin':'DM'}`, date: getTodayStr(), status: 'success', dCost: 0, sCost: 0, inputs: { Misi: m.title } });
+            saveState();
+            updateUIStats();
+            renderMissions();
+            renderHistory();
+            showAlert('success', 'Misi Selesai!', `Mendapat hadiah ${m.reward.toLocaleString('id-ID')} ${m.type==='coin'?'Koin':'Diamond'}!`); };
+
+        function renderRankTab() { let currentRank = getRank(gameState.rankPoints);
+            document.getElementById('tab-r-name').innerText = currentRank.name;
+            document.getElementById('tab-r-name').style.color = currentRank.color;
+            document.getElementById('tab-r-icon').className = `fas ${currentRank.icon} r-hero-icon`;
+            document.getElementById('tab-r-icon').style.color = currentRank.color;
+            document.getElementById('tab-r-pts').innerText = gameState.rankPoints.toLocaleString('id-ID');
+            document.getElementById('tab-r-max').innerText = currentRank.max > 9000000 ? 'MAX' : currentRank.max.toLocaleString('id-ID'); let pct = currentRank.max > 9000000 ? 100 : ((gameState.rankPoints - currentRank.min) / (currentRank.max - currentRank.min)) * 100;
+            document.getElementById('tab-r-bar').style.width = `${Math.min(100,Math.max(0,pct))}%`; let html = '';
+            rankTiers.forEach(r => { let activeClass = r.name === currentRank.name ? 'active-tier' : ''; let rewardText = `${r.reward.coin.toLocaleString('id-ID')} Koin + ${r.reward.diamond} DM`; let claimed = gameState.claimedRankRewards && gameState.claimedRankRewards.includes(r.name);
+            html += `<div class="r-tier-item ${activeClass}"><div class="r-tier-info"><i class="fas ${r.icon} r-tier-icon" style="color:${r.color}"></i><div><div class="r-tier-name">${r.name}</div><div class="r-tier-req">${r.min.toLocaleString('id-ID')} Pts</div></div></div><div class="r-tier-reward">${claimed?'✓':'🎁'} ${rewardText}</div></div>`; });
+            document.getElementById('rank-board-list').innerHTML = html;
+            updateSeasonCountdown(); }
+        let isTopupProcessing = false;
+
+        function updateRewardButtons() { document.querySelectorAll('.btn-buy-dm').forEach(btn => { let cost = parseInt(btn.getAttribute('data-cost')); if (gameState.coins >= cost) { btn.classList.remove('disabled');
+                    btn.innerText = 'Beli'; } else { btn.classList.add('disabled');
+                    btn.innerText = 'Kurang Koin'; } });
+            document.querySelectorAll('.btn-topup-game').forEach(btn => { let cost = parseInt(btn.getAttribute('data-coin')); if (gameState.coins >= cost) { btn.classList.remove('disabled');
+                    btn.innerText = 'Tukar'; } else { btn.classList.add('disabled');
+                    btn.innerText = 'Kurang Koin'; } });
+            document.querySelectorAll('.btn-buy-tips-pkg').forEach(btn => { let cost = parseInt(btn.getAttribute('data-cost')); if (gameState.diamonds >= cost) { btn.classList.remove('disabled');
+                    btn.innerText = 'Beli'; } else { btn.classList.add('disabled');
+                    btn.innerText = 'Kurang DM'; } }); }
+        window.buyTipsPackage = function(cost, gain, askConfirm = true) { if (askConfirm) { pendingAction = () => buyTipsPackage(cost, gain, false);
+                showUnifiedModal('confirm_action', { title: 'Beli Lampu Bantuan?', desc: `Apakah kamu ingin membeli ${gain} Lampu Bantuan dengan ${cost.toLocaleString('id-ID')} Diamond?`, icon: 'fa-lightbulb', color: 'var(--tips)', confirmText: 'Beli' }); return; } if (gameState.diamonds < cost) { showAlert('error', 'Gagal', 'Diamond tidak mencukupi.'); return; }
+            playClaim();
+            gameState.diamonds -= cost;
+            gameState.proTips += gain;
+            gameState.missionProgress['m_buytip']++;
+            gameState.history.unshift({ id: Date.now(), type: 'topup', game: 'Beli Paket Tips', item: `+ ${gain} Tips`, date: getTodayStr(), status: 'success', dCost: cost, sCost: 0, inputs: { Transaksi: 'Toko Bantuan' } });
+            saveState();
+            updateUIStats();
+            renderHistory();
+            closeUnifiedModal();
+            setTimeout(() => { showAlert('success', 'Pembelian Berhasil', `Mendapatkan ${gain} Pro Tips.`); }, 300); };
+        window.buyDiamondWithCoin = function(cost, gain, askConfirm = true) { if (askConfirm) { pendingAction = () => buyDiamondWithCoin(cost, gain, false);
+                showUnifiedModal('confirm_action', { title: 'Beli Diamond?', desc: `Apakah kamu ingin membeli ${gain} Diamond dengan ${cost.toLocaleString('id-ID')} Koin?`, icon: 'fa-gem', color: 'var(--diamond)', confirmText: 'Beli' }); return; } if (gameState.coins < cost) { showAlert('error', 'Gagal', 'Koin tidak mencukupi.'); return; }
+            playClaim();
+            gameState.coins -= cost;
+            gameState.diamonds += gain;
+            gameState.history.unshift({ id: Date.now(), type: 'topup', game: 'Tukar Koin', item: `+ ${gain} Diamonds`, date: getTodayStr(), status: 'success', dCost: 0, sCost: cost, inputs: { Transaksi: 'Beli Diamond' } });
+            saveState();
+            updateUIStats();
+            renderHistory();
+            closeUnifiedModal();
+            setTimeout(() => { showAlert('success', 'Pembelian Berhasil', `Ditukar ${cost.toLocaleString('id-ID')} Koin untuk ${gain} Diamonds.`); }, 300); };
+        window.openTopupModal = function(gameName, itemName, imgSrc, coinCost, type) { if (gameState.coins < coinCost) { showAlert('error', 'Gagal', 'Koin tidak mencukupi.'); return; }
+            showUnifiedModal('topup', { game: gameName, item: itemName, img: imgSrc, coinCost: coinCost, type: type }); };
+        window.submitTopup = function() { if (isTopupProcessing || !pendingTopupData) return; let inp1 = document.getElementById('tu-inp-1'); let inp2 = document.getElementById('tu-inp-2'); if (inp1 && inp1.value.trim() === '') { showAlert('info', 'Peringatan', 'Mohon isi form dengan lengkap!'); return; }
+            isTopupProcessing = true;
+            playClaim();
+            gameState.coins -= pendingTopupData.coinCost;
+            gameState.missionProgress['m_topup']++; let inputsObj = {}; if (pendingTopupData.type === 'rb') { inputsObj['Display Name'] = inp1.value;
+                inputsObj['Username'] = inp2.value; } else if (pendingTopupData.type === 'ff') { inputsObj['User ID'] = inp1.value; } else if (pendingTopupData.type === 'ml') { inputsObj['User ID'] = inp1.value;
+                inputsObj['Server ID'] = inp2.value; }
+            gameState.history.unshift({ id: Date.now(), type: 'topup', game: pendingTopupData.game, item: pendingTopupData.item, date: getTodayStr(), status: 'pending', dCost: 0, sCost: pendingTopupData.coinCost, inputs: inputsObj });
+            saveState();
+            updateUIStats();
+            renderHistory();
+            closeUnifiedModal();
+            setTimeout(() => { showAlert('success', 'Pesanan Diterima', 'Menunggu proses maksimal 7 Hari kerja. Pastikan main tiap hari agar pesanan tidak dibatalkan!');
+                isTopupProcessing = false;
+                pendingTopupData = null; }, 300); };
+        window.switchHistoryFilter = function(filter, el) { gameState.historyFilter = filter;
+            saveState();
+            document.querySelectorAll('.history-filter-btn').forEach(b => b.classList.remove('active')); if (el) el.classList.add('active');
+            renderHistory(); };
+
+        function switchHistoryFilter(filter, el) { gameState.historyFilter = filter;
+            document.querySelectorAll('.history-filter-btn').forEach(b => b.classList.remove('active')); if (el) el.classList.add('active');
+            renderHistory(); }
+
+        function renderHistory() { let container = document.getElementById('history-container'); const filter = gameState.historyFilter || 'all';
+            document.querySelectorAll('.history-filter-btn').forEach(btn => { const onclickAttr = btn.getAttribute('onclick') || '';
+                btn.classList.toggle('active', onclickAttr.includes(`switchHistoryFilter('${filter}'`)); }); const list = (gameState.history || []).filter(h => { const cat = h.category || (h.type === 'topup' ? 'penukaran' : h.type === 'spin' ? 'spin' : h.type === 'mission' ? 'misi' : h.type === 'login' ? 'harian' : 'all'); return filter === 'all' || cat === filter; }); if (list.length === 0) { container.innerHTML = `<div style="text-align:center;color:var(--text-muted);font-weight:900;margin-top:20px;">Belum ada riwayat transaksi.</div>`; return; } let html = ''; let today = new Date(getTodayStr());
+            list.forEach(h => { let statusText = h.status === 'success' ? 'Sukses' : (h.status === 'failed' ? 'Gagal' : 'Proses'); let daysLeftHTML = ''; if (h.status === 'pending') { let hDate = new Date(h.date); let passed = Math.ceil(Math.abs(today - hDate) / (1000 * 60 * 60 * 24)); let sisa = 7 - passed; if (sisa < 0) sisa = 0;
+                daysLeftHTML = `<div class="h-days-left" style="font-weight:900;font-size:12px;margin-top:5px;color:var(--blue);">Sisa ${sisa} Hari</div>`; } let costHTML = ''; if (h.type === 'topup') { let dHTML = h.dCost > 0 ? `<i class="fas fa-gem" style="color:var(--danger)"></i> <span style="color:var(--danger)">-${h.dCost}</span> &nbsp;` : ''; let cHTML = h.sCost > 0 ? `<i class="fas fa-coins" style="color:var(--danger)"></i> <span style="color:var(--danger)">-${h.sCost.toLocaleString('id-ID')}</span>` : '';
+                costHTML = `<span class="h-cost">${dHTML}${cHTML}</span>`; }
+            html += `<div class="h-item brutal-click-sm" onclick="showUnifiedModal('history',${h.id})"><div class="h-row"><span class="h-game">${h.game}</span><span class="h-status ${h.status}">${statusText}</span></div><div class="h-row" style="align-items:flex-end;"><div>${costHTML}</div><span class="h-gain">${h.item}</span></div>${daysLeftHTML}</div>`; });
+            container.innerHTML = html; const tabHistory = document.getElementById('tab-history'); if (tabHistory) tabHistory.scrollTop = 0; }
+        let sessionQuestions = 0,
+            sessionCoinsAdded = 0,
+            sessionPointsAdded = 0;
+        let isTipActiveForCurrentQuestion = false;
+        let questionStartTime = 0;
+        let currentModeGame = 'Matematika Dasar';
+        window.startGame = function(modeName, direct = false) { if (!direct) { pendingAction = () => startGame(modeName, true);
+                showUnifiedModal('start_game', { modeName }); return; }
+            playClick();
+            sessionQuestions = 0;
+            sessionCoinsAdded = 0;
+            sessionPointsAdded = 0;
+            currentModeGame = modeName;
+            gameState.lastPlayedDate = getTodayStr();
+            saveState();
+            document.getElementById('global-top-bar').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'flex';
+            document.getElementById('game-title-text').innerText = modeName;
+            setTimeout(fitQuestionArea, 0);
+            setTipButtonVisual(false);
+            loadNextQuestion(); };
+        window.goHome = function() { document.getElementById('global-top-bar').style.display = 'flex';
+            document.getElementById('game-screen').style.display = 'none'; const core = document.getElementById('q-core-area'); if (core) core.style.transform = 'scale(1)';
+            updateUIStats(); };
+        window.applyProTip = function() { playTips();
+            closeUnifiedModal();
+            gameState.proTips -= 1;
+            saveState();
+            updateUIStats();
+            isTipActiveForCurrentQuestion = true;
+            applyTipsVisuals(); };
+
+        function applyTipsVisuals() { document.querySelectorAll('.tips-pulse-yellow').forEach(el => el.classList.remove('tips-pulse-yellow')); const existingInd = document.getElementById('tips-indicator'); if (existingInd) existingInd.remove(); if (!isTipActiveForCurrentQuestion) { setTipButtonVisual(false); return; }
+            setTipButtonVisual(true); if (currentType === 1 || currentType === 3) { const ansBox = document.getElementById('ans-box'); if (ansBox) { ansBox.style.position = 'relative'; const tip = document.createElement('div');
+                    tip.className = 'tips-indicator-box purple-glow';
+                    tip.id = 'tips-indicator';
+                    tip.style.display = 'flex';
+                    tip.style.position = 'absolute';
+                    tip.style.right = '-55px';
+                    tip.innerText = currentAnswer;
+                    ansBox.appendChild(tip); } } else if (currentType === 2) { const tf = document.getElementById(`tf-${currentAnswer}`); if (tf) tf.classList.add('tips-pulse-yellow'); } else if (currentType === 4 || currentType === 5 || currentType === 6) { document.querySelectorAll('.opt-btn').forEach(b => { if (b.getAttribute('data-val') === String(currentAnswer)) b.classList.add('purple-glow'); }); } }
+        let questionQueue = [];
+
+        function getNextType() { if (questionQueue.length === 0) { let pool = [1, 2, 3, 4, 1, 2, 3, 4, 1, 4];
+                questionQueue = pool.sort(() => Math.random() - 0.5); } return questionQueue.pop(); }
+        let currentAnswer = null,
+            userInput = null,
+            isChecked = false,
+            currentType = 1; let lastQuestionString = ''; const ICONS = ['fa-apple-whole', 'fa-basketball', 'fa-star'];
+
+        function randomInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+        function setBtnReady() { const btn = document.getElementById('btn-check');
+            btn.classList.add('ready');
+            btn.innerText = 'PERIKSA';
+            btn.disabled = false; }
+
+        function buildNumpadHTML() { let html = '<div class="numpad-grid">'; [1, 2, 3, 4, 5, 6, 7, 8, 9, '.', 0, '/', 'del'].forEach(val => { let display = val === 'del' ? '<i class="fas fa-delete-left" style="color:var(--danger)"></i>' : val;
+            html += `<button class="np-btn brutal-click-sm" onclick="handleNumpad('${val}')">${display}</button>`; }); return html + '</div>'; }
+
+        function generateQuestion() { let modeQ = gameState.modeProgress[currentModeGame] || 0; let lvl = Math.floor(modeQ / 100) + 1; let type = 1,
+                a, b, c, ans, opStr, qStr, isTrue, fakeAns, icon;
+            document.getElementById('q-visual').style.display = 'none'; const setNumQuestion = (header, content, answer) => { document.getElementById('q-header').innerText = header;
+                document.getElementById('q-display').innerHTML = content;
+                currentAnswer = answer;
+                document.getElementById('input-area').innerHTML = buildNumpadHTML(); }; const setMcQuestion = (header, content, answer, options) => { document.getElementById('q-header').innerText = header;
+                document.getElementById('q-display').innerHTML = content;
+                currentAnswer = answer;
+                genMultipleChoiceOptions(currentAnswer, options); }; if (currentModeGame === 'Aljabar Dasar') { let variant = randomInt(1, 3); if (variant === 1 || lvl <= 3) { type = 1; let x = randomInt(1, 10 + lvl);
+                    a = randomInt(1, 5);
+                    b = randomInt(1, 20);
+                    opStr = Math.random() > 0.5 ? '+' : '-';
+                    c = opStr === '+' ? (a * x + b) : (a * x - b); let aStr = a === 1 ? '' : a;
+                    qStr = `${aStr}x ${opStr} ${b} = ${c}`;
+                    setNumQuestion('Carilah nilai x', `<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;"><span class="info-badge" onclick="showAlert('info','Info Aljabar','x adalah variabel yang harus dicari nilainya.')"><i class="fas fa-info-circle"></i> Info</span><span style="font-size:28px;">${qStr}</span></div><div style="display:flex;align-items:center;justify-content:center;margin-top:8px;">x = <div class="ans-box" id="ans-box" style="margin-left:12px;"></div></div>`, x); } else if (variant === 2) { type = 1; let x = randomInt(1, 8);
+                    a = randomInt(2, 6);
+                    b = x * a;
+                    c = b + randomInt(1, 10);
+                    qStr = `${x} × ${a} + _ = ${c}`;
+                    setNumQuestion('Isi titik-titik', `<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;"><span class="info-badge" onclick="showAlert('info','Info','Isi angka yang hilang pada soal.')"><i class="fas fa-info-circle"></i> Info</span><span style="font-size:28px;">${qStr}</span></div><div style="display:flex;align-items:center;justify-content:center;margin-top:8px;">Jawab: <div class="ans-box" id="ans-box" style="margin-left:12px;"></div></div>`, c - b); } else { type = 4;
+                    a = randomInt(5, 20);
+                    b = randomInt(2, 10);
+                    ans = a + b; let opts = [ans, ans + randomInt(2, 5), ans - randomInt(1, 4), ans + randomInt(6, 9)];
+                    opts = Array.from(new Set(opts.filter(v => v > 0))).slice(0, 4);
+                    opts.sort(() => Math.random() - 0.5);
+                    setMcQuestion('Hitung aljabar', `<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;"><span class="info-badge" onclick="showAlert('info','Info','Hitung penjumlahan sederhana.')"><i class="fas fa-info-circle"></i> Info</span><span style="font-size:28px;">${a} + ${b} = ?</span></div><div style="text-align:center;margin-top:8px;"><div class="ans-box" id="ans-box"></div></div>`, String(ans), opts); } } else if (currentModeGame === 'Logika Pecahan') { type = 1; const opPool = lvl <= 3 ? ['+', '-'] : (lvl <= 7 ? ['+', '-'] : ['×']);
+                opStr = opPool[randomInt(0, opPool.length - 1)]; let fn1, fd1, fn2, fd2, rn, rd; if (lvl <= 3) { fd1 = randomInt(2, 9);
+                    fd2 = fd1;
+                    fn1 = randomInt(1, fd1 - 1);
+                    fn2 = opStr === '+' ? randomInt(1, fd1 - fn1) : randomInt(1, fn1); } else if (lvl <= 7) { fd1 = randomInt(2, 9);
+                    fd2 = randomInt(2, 9);
+                    fn1 = randomInt(1, fd1 - 1);
+                    fn2 = randomInt(1, fd2 - 1); } else { fd1 = randomInt(2, 9);
+                    fd2 = randomInt(2, 9);
+                    fn1 = randomInt(1, fd1 - 1);
+                    fn2 = randomInt(1, fd2 - 1);
+                    opStr = '×'; } const frac1 = { n: fn1, d: fd1 }; const frac2 = { n: fn2, d: fd2 }; if (opStr === '+') { rn = frac1.n * frac2.d + frac2.n * frac1.d;
+                    rd = frac1.d * frac2.d; } else if (opStr === '-') { rn = frac1.n * frac2.d - frac2.n * frac1.d;
+                    rd = frac1.d * frac2.d; } else { rn = frac1.n * frac2.n;
+                    rd = frac1.d * frac2.d; } const simp = simplifyFraction(rn, rd); let askNumerator = Math.random() > 0.5 && simp.d !== 1; let answerDisplay = askNumerator ? String(simp.n) : fractionToString(simp); let answerHint = askNumerator ? `Pembilang: ${simp.n}/${simp.d}` : fractionToString(simp);
+                setNumQuestion('Hitung pecahan', `<div class="fraction-wrap"><div class="fraction"><span>${frac1.n}</span><span class="f-bar"></span><span>${frac1.d}</span></div><span style="font-size:30px;font-weight:900;">${opStr}</span><div class="fraction"><span>${frac2.n}</span><span class="f-bar"></span><span>${frac2.d}</span></div><span style="font-size:30px;font-weight:900;">=</span><span style="font-size:13px;color:var(--text-muted);">${askNumerator?'(pembilang)':'(jawaban)'}</span></div><div style="text-align:center;margin-top:8px;"><div class="ans-box" id="ans-box" style="min-width:60px;"></div></div>`, answerDisplay); } else if (currentModeGame === 'Pola Bilangan') { type = 4; const patternType = lvl <= 3 ? randomInt(1, 2) : (lvl <= 7 ? randomInt(1, 3) : randomInt(2, 4)); let seq = [],
+                    correct = 0,
+                    options = []; if (patternType === 1) { const start = randomInt(1, 9); const step = randomInt(2, 6);
+                    seq = [start, start + step, start + step * 2, start + step * 3];
+                    correct = start + step * 4;
+                    options = [correct, correct + step, correct - step, correct + step * 2].filter(v => v > 0); } else if (patternType === 2) { const start = randomInt(1, 4);
+                    seq = [start, start * 2, start * 4, start * 8];
+                    correct = start * 16;
+                    options = [correct, correct / 2, correct * 2, correct + start].filter(v => Number.isFinite(v)); } else if (patternType === 3) { const a1 = randomInt(1, 5);
+                    seq = [a1, a1 + 2, a1 + 5, a1 + 9];
+                    correct = a1 + 14;
+                    options = [correct, correct - 1, correct + 2, correct - 3]; } else { const n = randomInt(2, 6);
+                    seq = [n, n * n, n * n + n, n * n + n + 1];
+                    correct = n * n + n + 3;
+                    options = [correct, correct - 2, correct + 1, correct + 4]; }
+                options = [...new Set(options.map(v => Math.round(v)).filter(v => v > 0))]; while (options.length < 4) options.push(correct + randomInt(1, 8));
+                options = Array.from(new Set(options)).slice(0, 4);
+                options.sort(() => Math.random() - 0.5);
+                setMcQuestion('Pilih angka berikutnya', `<div style="font-size:20px;font-weight:900;text-align:center;line-height:1.4;margin-bottom:8px;word-break:break-word;">${seq.join(' , ')} , <span class="ans-box" id="ans-box" style="display:inline-flex;vertical-align:middle;"></span></div>`, String(correct), options); } else if (currentModeGame === 'Tebak Logika') { type = 4; const logType = lvl <= 3 ? 1 : (lvl <= 7 ? 2 : 3); let questionText = '',
+                    correct = '',
+                    options = []; if (logType === 1) { const n = randomInt(2, 9); const rule = randomInt(1, 3); if (rule === 1) { correct = String(n + 3);
+                        questionText = `Jika ${n} → ${n+3}, maka ${n+2} → ?`;
+                        options = [Number(correct), Number(correct) + 2, Number(correct) - 1, Number(correct) + 4]; } else if (rule === 2) { correct = String(n * 2 + 1);
+                        questionText = `Jika ${n} → ${n*2+1}, maka ${n+1} → ?`;
+                        options = [Number(correct), Number(correct) - 2, Number(correct) + 1, Number(correct) + 3]; } else { correct = String(n * n);
+                        questionText = `Jika ${n} → ${n*n}, maka ${n+1} → ?`;
+                        options = [Number(correct) + 1, Number(correct), Number(correct) - 2, Number(correct) + 4]; } } else if (logType === 2) { const a = randomInt(1, 9); const b = randomInt(2, 9); const c = a + b;
+                    correct = String(c + a);
+                    questionText = `Pilih hasil yang benar: ${a} + ${b} + ${a} = ?`;
+                    options = [Number(correct), Number(correct) - 1, Number(correct) + 2, Number(correct) + 4]; } else { const seq = [2, 6, 12, 20];
+                    correct = '30';
+                    questionText = `Pola mana yang benar setelah ${seq.join(', ')} ?`;
+                    options = [30, 28, 32, 26]; }
+                options = Array.from(new Set(options.map(v => String(v)))); while (options.length < 4) options.push(String(Number(correct) + randomInt(1, 5)));
+                options = Array.from(new Set(options)).slice(0, 4);
+                options.sort(() => Math.random() - 0.5);
+                setMcQuestion('Tebak logika', `<div class="logic-badge" style="margin:0 auto 14px;">${questionText}</div><div class="eq-display" style="font-size:30px;margin-bottom:8px;"><span class="ans-box" id="ans-box"></span></div>`, String(correct), options); } else {
+            let minVal = Math.min(50, 1 + (lvl * 2) + sessionQuestions); let maxVal = Math.min(100, 10 + (lvl * 10) + (sessionQuestions * 5)); let opList = ['+', '-', '×', '÷']; do { type = getNextType(); let chosenOp = opList[randomInt(0, 3)]; if (type === 3) chosenOp = (Math.random() > 0.5) ? '+' : '-'; if (chosenOp === '+') { a = randomInt(minVal, maxVal);
+                    b = randomInt(1, a);
+                    ans = a + b;
+                    opStr = '+'; } else if (chosenOp === '-') { a = randomInt(minVal, maxVal);
+                    b = randomInt(1, a - 1);
+                    ans = a - b;
+                    opStr = '-'; } else if (chosenOp === '×') { a = randomInt(2, 12);
+                    b = randomInt(2, 10);
+                    ans = a * b;
+                    opStr = '×'; } else if (chosenOp === '÷') { b = randomInt(2, 10);
+                    ans = randomInt(2, 12);
+                    a = b * ans;
+                    opStr = '÷'; } if (type === 1) qStr = `${a} ${opStr} ${b}`; else if (type === 2) { isTrue = Math.random() > 0.5;
+                    fakeAns = isTrue ? ans : ans + randomInt(1, 5) * (Math.random() > 0.5 ? 1 : -1);
+                    qStr = `TF:${a}${opStr}${b}=${fakeAns}`; } else if (type === 3) { let maxVis = Math.min(20, 5 + (lvl * 2)); if (opStr === '+') { a = randomInt(1, maxVis / 2);
+                        b = randomInt(1, maxVis / 2);
+                        ans = a + b; } else { a = randomInt(4, maxVis);
+                        b = randomInt(1, a - 1);
+                        ans = a - b; }
+                    icon = ICONS[randomInt(0, ICONS.length - 1)];
+                    qStr = `VIS:${a}${opStr}${b}`; } else qStr = `MC:${a}${opStr}${b}`; } while (qStr === lastQuestionString);
+            lastQuestionString = qStr;
+            currentAnswer = Number(ans); if (type === 1) { setNumQuestion('Hitunglah', `${a} ${opStr} ${b} = <div class="ans-box" id="ans-box"></div>`, String(currentAnswer)); } else if (type === 2) { currentAnswer = isTrue ? 'true' : 'false';
+                document.getElementById('q-header').innerText = 'Benar atau Salah?';
+                document.getElementById('q-display').innerHTML = `<div class="tf-eq" style="background:#FFF;padding:10px 20px;border:4px solid #000;border-radius:12px;box-shadow:6px 6px 0 #000;">${a} ${opStr} ${b} = <span style="color:var(--danger)">${fakeAns}</span></div>`;
+                document.getElementById('input-area').innerHTML = `<div class="tf-grid"><button id="tf-false" class="tf-btn false-btn brutal-click" onclick="handleTF('false')"><i class="fas fa-times" style="color:var(--danger)"></i></button><button id="tf-true" class="tf-btn true-btn brutal-click" onclick="handleTF('true')"><i class="fas fa-check" style="color:var(--secondary)"></i></button></div>`; } else if (type === 3) { document.getElementById('q-header').innerText = `Selesaikan ${opStr==='+'?'penjumlahan':'pengurangan'}:`;
+                document.getElementById('q-display').innerHTML = `${a} ${opStr} ${b} = <div class="ans-box" id="ans-box"></div>`; let leftIcons = '',
+                    rightIcons = ''; for (let i = 0; i < a; i++) leftIcons += `<i class="fas ${icon}" style="color:var(--danger)"></i>`; for (let i = 0; i < b; i++) rightIcons += `<i class="fas ${icon}" style="color:var(--blue)"></i>`; const visBox = document.getElementById('q-visual');
+                visBox.style.display = 'flex';
+                visBox.innerHTML = `<div class="visual-group" style="background:#FFF;padding:8px;border:3px solid #000;border-radius:8px;box-shadow:4px 4px 0 #000;">${leftIcons}</div><div class="visual-op" style="font-size:30px;font-weight:900;margin:0 5px;">${opStr}</div><div class="visual-group" style="background:#FFF;padding:8px;border:3px solid #000;border-radius:8px;box-shadow:4px 4px 0 #000;">${rightIcons}</div>`;
+                genMultipleChoiceOptions(currentAnswer); } else { document.getElementById('q-header').innerText = 'Hitunglah';
+                document.getElementById('q-display').innerHTML = `${a} ${opStr} ${b} = <div class="ans-box" id="ans-box"></div>`;
+                genMultipleChoiceOptions(currentAnswer); } }
+            currentType = type;
+            applyTipsVisuals();
+            questionStartTime = Date.now();
+            setTimeout(fitQuestionArea, 0); }
+
+        function genMultipleChoiceOptions(correct, forceOptions = null) { let opts = new Set(); const correctStr = String(correct);
+            opts.add(correctStr); let options = forceOptions ? forceOptions.map(v => String(v)) : []; if (options.length > 0) { options.forEach(v => opts.add(String(v))); } let attempts = 0; while (opts.size < 4 && attempts < 100) { let base = parseFractionValue(correctStr) ? parseFractionValue(correctStr).n : Number(correctStr); let wrong = base + (randomInt(1, 10) * (Math.random() > 0.5 ? 1 : -1)); if (String(wrong) !== correctStr && Number(wrong) >= 0) opts.add(String(wrong));
+                attempts++; } let fallback = 1; while (opts.size < 4) { if (!opts.has(String(fallback)) && String(fallback) !== correctStr) opts.add(String(fallback));
+                fallback++; } let optsArr = Array.from(opts).sort(() => Math.random() - 0.5).slice(0, 4); let html = '<div class="mcq-grid">';
+            optsArr.forEach(val => { html += `<button class="np-btn opt-btn brutal-click-sm" data-val="${val}" onclick="handleMC('${val}',this)">${val}</button>`; });
+            document.getElementById('input-area').innerHTML = html + '</div>'; }
+        window.handleNumpad = function(val) { if (isChecked) return;
+            playClick(); let indBox = document.getElementById('tips-indicator'); if (indBox) indBox.style.display = 'none'; if (val === 'del') { if (userInput) userInput = userInput.slice(0, -1); } else if (val === '.') { if (!userInput) userInput = '0.'; else if (!userInput.includes('.')) userInput += '.'; } else { userInput = (userInput || '') + val; } let box = document.getElementById('ans-box');
+            box.innerHTML = userInput || ''; if (isTipActiveForCurrentQuestion) { box.style.position = 'relative'; const tip = document.createElement('div');
+                tip.className = 'tips-indicator-box purple-glow';
+                tip.id = 'tips-indicator';
+                tip.style.display = 'flex';
+                tip.style.position = 'absolute';
+                tip.style.right = '-55px';
+                tip.innerText = currentAnswer;
+                box.appendChild(tip); } if (userInput && userInput.length > 0) { box.classList.add('selected');
+                setBtnReady(); } else { box.classList.remove('selected'); const btn = document.getElementById('btn-check');
+                btn.className = 'periksa-btn brutal-click';
+                btn.innerText = 'PERIKSA';
+                btn.disabled = true; } };
+        window.handleTF = function(val) { if (isChecked) return;
+            playClick();
+            userInput = val;
+            document.querySelectorAll('.tf-btn').forEach(b => { b.classList.remove('selected'); if (isTipActiveForCurrentQuestion && b.id === `tf-${currentAnswer}`) b.classList.add('tips-pulse-yellow'); });
+            document.getElementById(`tf-${val}`).classList.add('selected');
+            setBtnReady(); };
+        window.handleMC = function(val, el) { if (isChecked) return;
+            playClick();
+            userInput = val;
+            document.querySelectorAll('.opt-btn').forEach(b => { b.classList.remove('selected'); if (isTipActiveForCurrentQuestion && b.getAttribute('data-val') === String(currentAnswer)) b.classList.add('purple-glow'); });
+            el.classList.add('selected'); const ansBox = document.getElementById('ans-box'); if (ansBox) { ansBox.innerText = val;
+                ansBox.classList.add('selected'); }
+            setBtnReady(); };
+
+        function processNextOrEnd() { if (sessionQuestions >= 10) { processEndSession(); } else { loadNextQuestion(); } }
+
+        function loadNextQuestion() { sessionQuestions++;
+            userInput = null;
+            isChecked = false;
+            usedCalculator = false;
+            isTipActiveForCurrentQuestion = false;
+            document.getElementById('q-counter').innerText = sessionQuestions + '/10';
+            document.getElementById('app').className = '';
+            document.getElementById('q-core-area').style.display = 'none';
+            document.getElementById('loading-overlay').style.display = 'flex'; const btn = document.getElementById('btn-check');
+            btn.className = 'periksa-btn brutal-click';
+            btn.innerText = 'PERIKSA';
+            btn.disabled = true;
+            updateUIStats(); let progressPercent = ((sessionQuestions - 1) / 10) * 100;
+            document.getElementById('progress-bar').style.width = Math.max(2, progressPercent) + '%';
+            setTimeout(() => { document.getElementById('loading-overlay').style.display = 'none';
+                document.getElementById('q-core-area').style.display = 'flex';
+                generateQuestion();
+                setTimeout(fitQuestionArea, 0); }, 200); }
+        window.checkAnswer = function() { const btn = document.getElementById('btn-check'); if (isChecked) { playClick();
+                processNextOrEnd(); return; } if (userInput === null || userInput === '') return;
+            isChecked = true; let isCorrect = compareAnswers(userInput, currentAnswer); let timeTaken = (Date.now() - questionStartTime) / 1000;
+            document.getElementById('progress-bar').style.width = ((sessionQuestions) / 10) * 100 + '%';
+            document.querySelectorAll('.tips-pulse-yellow').forEach(el => el.classList.remove('tips-pulse-yellow'));
+            document.querySelectorAll('.purple-glow').forEach(el => el.classList.remove('purple-glow')); let indBox = document.getElementById('tips-indicator'); if (indBox) indBox.remove(); if (isCorrect) { playSuccess();
+                btn.className = 'periksa-btn correct-btn brutal-click';
+                btn.innerText = 'LANJUTKAN';
+                document.getElementById('app').classList.add('bg-correct'); let coinGained = 20; let ptGained = Math.max(5, Math.floor(50 - (timeTaken * 2))); if (isTipActiveForCurrentQuestion) { coinGained = 5;
+                    ptGained = Math.floor(ptGained / 2); }
+                sessionCoinsAdded += coinGained;
+                sessionPointsAdded += ptGained;
+                gameState.missionProgress['m_benar5']++;
+                gameState.missionProgress['m_benar10']++;
+                gameState.missionProgress['m_benar25']++;
+                gameState.missionProgress['m_benar50']++;
+                gameState.missionProgress['m_benar100']++; if (!usedCalculator && !isTipActiveForCurrentQuestion) gameState.missionProgress['m_benar1000_nocalc']++; const ansBox = document.getElementById('ans-box'); if (ansBox) { ansBox.classList.add('correct-flash'); } if (currentType === 2) { document.getElementById(`tf-${currentAnswer}`).classList.add('opt-correct'); } else if (currentType === 4 || currentType === 5 || currentType === 6) { document.querySelectorAll('.opt-btn').forEach(b => { if (b.getAttribute('data-val') === String(currentAnswer)) { b.classList.add('opt-correct'); } }); } } else { playError();
+                btn.className = 'periksa-btn wrong-btn brutal-click';
+                btn.innerText = 'LANJUTKAN';
+                document.getElementById('app').classList.add('bg-wrong');
+                sessionCoinsAdded -= 5;
+                sessionPointsAdded -= 15; if (currentType === 1 || currentType === 3) { const ansBox = document.getElementById('ans-box');
+                    ansBox.classList.add('wrong-flash');
+                    ansBox.innerHTML = `<span style="color:#FFF;font-size:20px;">${userInput}</span>`; const displayArea = document.getElementById('q-display'); const correctEl = document.createElement('span');
+                    correctEl.className = 'ans-box show-correct-next';
+                    correctEl.style.display = 'inline-flex';
+                    correctEl.style.marginLeft = '12px';
+                    correctEl.style.minWidth = '45px';
+                    correctEl.innerText = currentAnswer;
+                    displayArea.appendChild(correctEl); if (currentModeGame === 'Aljabar Dasar') { const core = document.getElementById('q-core-area'); if (core) core.classList.add('shake-anim'); const infoDiv = document.createElement('div');
+                        infoDiv.style.cssText = 'background:#E0F2FE;border:2px solid #000;border-radius:8px;padding:8px 14px;margin-top:10px;font-weight:900;font-size:12px;color:var(--blue);text-align:center;box-shadow:2px 2px 0 #000;';
+                        infoDiv.innerText = `Jawaban yang benar adalah ${currentAnswer}. Coba lagi ya!`;
+                        core.appendChild(infoDiv);
+                        setTimeout(() => { core.classList.remove('shake-anim'); if (infoDiv.parentNode) infoDiv.remove(); }, 3000); } } else if (currentType === 2) { document.getElementById(`tf-${userInput}`).classList.add('opt-wrong');
+                    document.getElementById(`tf-${currentAnswer}`).classList.add('opt-show-correct'); } else { document.querySelectorAll('.opt-btn').forEach(b => { if (b.getAttribute('data-val') === String(userInput)) { b.classList.add('opt-wrong'); } if (b.getAttribute('data-val') === String(currentAnswer)) { b.classList.add('opt-show-correct'); } }); } }
+            gameState.modeProgress[currentModeGame] = (gameState.modeProgress[currentModeGame] || 0) + 1; };
+        let pendingRankReward = null;
+        let pendingAction = null;
+
+        function getRankUpReward(rankName) { const tier = rankTiers.find(r => r.name === rankName); return tier ? tier.reward : { coin: 500, diamond: 1 }; }
+
+        function processEndSession() { playClaim();
+            document.getElementById('app').className = '';
+            gameState.missionProgress['m_sesi1']++;
+            gameState.missionProgress['m_sesi3']++;
+            gameState.missionProgress['m_sesi5']++;
+            gameState.missionProgress['m_sesi10']++;
+            gameState.missionProgress['m_sesi20']++; if (currentModeGame === 'Aljabar Dasar') gameState.missionProgress['m_aljabar']++; if (currentModeGame === 'Logika Pecahan') gameState.missionProgress['m_pecahan']++;
+            saveState(); const oldRank = getRank(gameState.rankPoints);
+            gameState.rankPoints = Math.max(0, gameState.rankPoints + sessionPointsAdded); const currentRank = getRank(gameState.rankPoints); if (currentRank.name !== oldRank.name && gameState.rankPoints > oldRank.max) { if (!gameState.claimedRankRewards) gameState.claimedRankRewards = []; if (!gameState.claimedRankRewards.includes(currentRank.name)) { pendingRankReward = getRankUpReward(currentRank.name); } }
+            document.getElementById('rnk-name').innerText = currentRank.name;
+            document.getElementById('rnk-name').style.color = currentRank.color;
+            document.getElementById('rnk-icon').className = `fas ${currentRank.icon} rank-icon`;
+            document.getElementById('rnk-icon').style.color = currentRank.color; let maxText = currentRank.max > 9000000 ? 'MAX' : currentRank.max.toLocaleString('id-ID');
+            document.getElementById('rnk-max').innerText = maxText; let pct = currentRank.max > 9000000 ? 100 : ((gameState.rankPoints - currentRank.min) / (currentRank.max - currentRank.min)) * 100;
+            setTimeout(() => { document.getElementById('rnk-bar').style.width = `${Math.min(100,Math.max(0,pct))}%`;
+                document.getElementById('rnk-pts').innerText = `${gameState.rankPoints.toLocaleString('id-ID')} Poin`;
+                document.getElementById('rnk-pts').classList.add('rank-slide'); }, 200);
+            document.getElementById('fs-rank-modal').style.display = 'flex'; if (isCanvasActive) toggleDrawing(); }
+        window.claimRankUpReward = function() { if (!pendingRankReward) return;
+            playClaim();
+            gameState.coins += pendingRankReward.coin;
+            gameState.diamonds += pendingRankReward.diamond; if (!gameState.claimedRankRewards) gameState.claimedRankRewards = [];
+            gameState.claimedRankRewards.push(getRank(gameState.rankPoints).name);
+            gameState.history.unshift({ id: Date.now(), type: 'rank', category: 'misi', game: 'Rank Up Reward', item: `+ ${pendingRankReward.coin.toLocaleString('id-ID')} Koin & +${pendingRankReward.diamond} DM`, date: getTodayStr(), status: 'success', dCost: 0, sCost: 0, inputs: { Rank: getRank(gameState.rankPoints).name } });
+            saveState();
+            updateUIStats();
+            renderHistory(); const reward = pendingRankReward;
+            pendingRankReward = null;
+            closeUnifiedModal(true);
+            setTimeout(() => { showAlert('success', 'Rank Up!', `Hadiah Rank Up diterima: ${reward.coin.toLocaleString('id-ID')} Koin dan ${reward.diamond} DM.`); }, 250); };
+        window.showClaimSession = function() { if (pendingRankReward) { showUnifiedModal('rank_reward', pendingRankReward); return; }
+            playClick();
+            document.getElementById('fs-rank-modal').style.display = 'none'; if (sessionCoinsAdded < 0 || sessionPointsAdded < 0) { document.getElementById('session-coins-added').innerText = sessionCoinsAdded.toLocaleString('id-ID');
+                document.getElementById('session-pts-added').innerText = sessionPointsAdded.toLocaleString('id-ID');
+                document.getElementById('claim-reward-box').style.display = 'none';
+                document.getElementById('session-pts-container').style.display = 'none';
+                document.getElementById('retry-container').style.display = 'block'; } else { let cText = sessionCoinsAdded > 0 ? `+${sessionCoinsAdded.toLocaleString('id-ID')}` : sessionCoinsAdded.toLocaleString('id-ID');
+                document.getElementById('session-coins-added').innerText = cText; let pText = sessionPointsAdded > 0 ? `+${sessionPointsAdded.toLocaleString('id-ID')}` : sessionPointsAdded.toLocaleString('id-ID');
+                document.getElementById('session-pts-added').innerText = pText;
+                document.getElementById('claim-reward-box').style.display = 'flex';
+                document.getElementById('session-pts-container').style.display = 'block';
+                document.getElementById('retry-container').style.display = 'none'; }
+            document.getElementById('fs-claim-modal').style.display = 'flex'; };
+        window.retrySession = function() { playClick();
+            document.getElementById('fs-claim-modal').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'none';
+            document.getElementById('global-top-bar').style.display = 'flex';
+            updateUIStats();
+            setTimeout(() => { startGame(currentModeGame, true); }, 500); };
+        window.endSessionAndHome = function() { playClick();
+            gameState.coins = Math.max(0, gameState.coins + sessionCoinsAdded);
+            sessionCoinsAdded = 0;
+            sessionPointsAdded = 0;
+            saveState();
+            document.getElementById('fs-claim-modal').style.display = 'none';
+            document.getElementById('claim-reward-box').style.display = 'flex';
+            document.getElementById('session-pts-container').style.display = 'block';
+            document.getElementById('retry-container').style.display = 'none';
+            goHome(); };
+        window.showPendingAction = function() { if (typeof pendingAction === 'function') { const fn = pendingAction;
+                pendingAction = null;
+                closeUnifiedModal(true);
+                setTimeout(() => { try { fn(); } catch (e) { console.error(e); } }, 50); } };
+
+        function fitQuestionArea() { const screen = document.getElementById('game-screen'); const content = document.getElementById('game-content-anim'); const core = document.getElementById('q-core-area'); if (!screen || !content || !core || screen.style.display !== 'flex') return;
+            core.style.transformOrigin = 'top center';
+            core.style.width = '100%';
+            core.style.transform = 'scale(1)';
+            requestAnimationFrame(() => { const available = Math.max(220, content.clientHeight - 6); const needed = Math.max(core.scrollHeight, 1); let scale = Math.min(1, available / needed); if (!Number.isFinite(scale) || scale <= 0) scale = 1;
+                core.style.transform = `scale(${Math.max(0.72,scale)})`; }); }
+        window.confirmSpinGacha = function(times, currency) { const costText = times === 1 ? '1.000 Koin' : '50 Diamond'; const itemText = times === 1 ? 'Spin 1x' : 'Spin 10x';
+            pendingAction = () => spinGacha(times, currency);
+            showUnifiedModal('confirm_action', { title: `Konfirmasi ${itemText}?`, desc: `Apakah kamu ingin gacha ${times} kali dengan biaya ${costText}?`, icon: 'fa-dice', color: currency === 'diamond' ? 'var(--diamond)' : 'var(--coin)', confirmText: 'YA, GAS' }); };
+        window.addEventListener('resize', () => { try { fitQuestionArea(); } catch (e) {} });
+        window.onload = () => { loadState(); };
+        setInterval(updateSeasonCountdown, 60000);
+    </script>
+</body>
+</html>
